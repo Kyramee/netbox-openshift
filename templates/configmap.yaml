@@ -294,7 +294,7 @@ data:
     NAPALM_TIMEOUT: {{ int .Values.napalm.timeout }}
     NAPALM_ARGS: {{ toJson .Values.napalm.args }}
 
-  {{- if eq .Values.remoteAuth.backend "netbox.authentication.LDAPBackend" }}
+  {{- if eq .Values.remoteAuthBackend "netbox.authentication.LDAPBackend" }}
 
   ldap_config.py: |
     import yaml
