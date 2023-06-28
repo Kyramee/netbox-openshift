@@ -223,10 +223,8 @@ podAnnotations: {}
 podLabels: {}
 
 podSecurityContext:
-  fsGroup: 1000
+  fsGroup:
   runAsNonRoot: true
-  # runAsUser: 1000
-  # runAsGroup: 1000
 
 securityContext:
   capabilities:
@@ -234,8 +232,8 @@ securityContext:
       - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
-  runAsUser: 1000
-  runAsGroup: 1000
+  runAsUser:
+  runAsGroup:
 
 service:
   annotations: {}
@@ -324,8 +322,8 @@ init:
         - ALL
     readOnlyRootFilesystem: true
     runAsNonRoot: true
-    runAsUser: 1000
-    runAsGroup: 1000  # Keep the same as securityContext.runAsGroup
+    runAsUser:
+    runAsGroup:
 
 test:
   image:
@@ -404,19 +402,16 @@ housekeeping:
   podLabels: {}
 
   podSecurityContext:
-    fsGroup: 1000
+    fsGroup:
     runAsNonRoot: true
-    # runAsUser: 1000
-    # runAsGroup: 1000
-
   securityContext:
     capabilities:
       drop:
         - ALL
     readOnlyRootFilesystem: true
     runAsNonRoot: true
-    runAsUser: 1000
-    runAsGroup: 1000
+    runAsUser:
+    runAsGroup:
 
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -478,10 +473,8 @@ worker:
   podLabels: {}
 
   podSecurityContext:
-    fsGroup: 1000
+    fsGroup:
     runAsNonRoot: true
-    # runAsUser: 1000
-    # runAsGroup: 1000
 
   securityContext:
     capabilities:
@@ -489,8 +482,8 @@ worker:
         - ALL
     readOnlyRootFilesystem: true
     runAsNonRoot: true
-    runAsUser: 1000
-    runAsGroup: 1000
+    runAsUser:
+    runAsGroup:
 
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
