@@ -109,15 +109,15 @@ data:
         SSL: {{ toJson .Values.externalTasksRedis.ssl }}
         INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.externalTasksRedis.insecureSkipTlsVerify }}
         CA_CERT_PATH: {{ .Values.externalTasksRedis.caCertPath | quote }}
-        {{- else if .Values.useSentinalRedis }}
-        SENTINELS: {{ toJson .Values.sentinalTasksRedis.sentinels }}
-        SENTINEL_SERVICE: {{ .Values.sentinalTasksRedis.sentinelService | quote }}
-        SENTINEL_TIMEOUT: {{ .Values.sentinalTasksRedis.sentinelTimeout | int }}
-        USERNAME: {{ .Values.sentinalTasksRedis.username | quote }}
-        DATABASE: {{ int .Values.sentinalTasksRedis.database }}
-        SSL: {{ toJson .Values.sentinalTasksRedis.ssl }}
-        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.sentinalTasksRedis.insecureSkipTlsVerify }}
-        CA_CERT_PATH: {{ .Values.sentinalTasksRedis.caCertPath | quote }}
+        {{- else if .Values.useSentinelRedis }}
+        SENTINELS: {{ toJson .Values.sentinelTasksRedis.sentinels }}
+        SENTINEL_SERVICE: {{ .Values.sentinelTasksRedis.sentinelService | quote }}
+        SENTINEL_TIMEOUT: {{ .Values.sentinelTasksRedis.sentinelTimeout | int }}
+        USERNAME: {{ .Values.sentinelTasksRedis.username | quote }}
+        DATABASE: {{ int .Values.sentinelTasksRedis.database }}
+        SSL: {{ toJson .Values.sentinelTasksRedis.ssl }}
+        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.sentinelTasksRedis.insecureSkipTlsVerify }}
+        CA_CERT_PATH: {{ .Values.sentinelTasksRedis.caCertPath | quote }}
         {{- end }}
         
       caching:
@@ -137,15 +137,15 @@ data:
         SSL: {{ toJson .Values.externalexternalCachingRedis.ssl }}
         INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.externalexternalCachingRedis.insecureSkipTlsVerify }}
         CA_CERT_PATH: {{ .Values.externalexternalCachingRedis.caCertPath | quote }}
-        {{- else if .Values.useSentinalRedis }}
-        SENTINELS: {{ toJson .Values.sentinalCachingRedis.sentinels }}
-        SENTINEL_SERVICE: {{ .Values.sentinalCachingRedis.sentinelService | quote }}
-        SENTINEL_TIMEOUT: {{ .Values.sentinalCachingRedis.sentinelTimeout | int }}
-        USERNAME: {{ .Values.sentinalCachingRedis.username | quote }}
-        DATABASE: {{ int .Values.sentinalCachingRedis.database }}
-        SSL: {{ toJson .Values.sentinalCachingRedis.ssl }}
-        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.sentinalCachingRedis.insecureSkipTlsVerify }}
-        CA_CERT_PATH: {{ .Values.sentinalCachingRedis.caCertPath | quote }}
+        {{- else if .Values.useSentinelRedis }}
+        SENTINELS: {{ toJson .Values.sentinelCachingRedis.sentinels }}
+        SENTINEL_SERVICE: {{ .Values.sentinelCachingRedis.sentinelService | quote }}
+        SENTINEL_TIMEOUT: {{ .Values.sentinelCachingRedis.sentinelTimeout | int }}
+        USERNAME: {{ .Values.sentinelCachingRedis.username | quote }}
+        DATABASE: {{ int .Values.sentinelCachingRedis.database }}
+        SSL: {{ toJson .Values.sentinelCachingRedis.ssl }}
+        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.sentinelCachingRedis.insecureSkipTlsVerify }}
+        CA_CERT_PATH: {{ .Values.sentinelCachingRedis.caCertPath | quote }}
         {{- end }}
     
     # -------------------------------------------------------------------------

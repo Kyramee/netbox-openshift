@@ -557,10 +557,10 @@ useBundlePostgresql: true
 
 
 ## Set one only one to true to chose between using bundled, external or
-# sentinal redis
+# sentinel redis
 useBundleRedis: true
 useExternalRedis: false
-useSentinalRedis: false
+useSentinelRedis: false
 
 ###########################################################################
 #
@@ -579,9 +579,9 @@ useSentinalRedis: false
 allowedHosts:
   - '*'
 
-## Bundle database seeting
-# These options overwrite the postgresql value is configured as global in the
-# bitnami values.yaml. See the bitnami values.yaml file here:
+## Bundle database settings
+# hese options overwrite the default values in the bundle postgresql chart
+# values.yaml file. See the bitnami values.yaml file here:
 # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
 postgresql:
   auth:
@@ -602,6 +602,23 @@ externalDatabase:
   connMaxAge: 300
   disableServerSideCursors: false
   targetSessionAttrs: read-write
+
+
+## Bundle redis settings
+# These options overwrite the default values in the bundle redis chart
+# values.yaml file. See the bitnami values.yaml file here:
+# https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+redis:
+  master:
+    podSecurityContext:
+      fsGroup:
+    containerSecurityContext:
+      runAsUser:
+  replica:
+    podSecurityContext:
+      fsGroup:
+    containerSecurityContext:
+      runAsUser:
 
 ## Bundle redis settings
 # These are used if useBundleRedis is true, and are ignored otherwise
@@ -655,9 +672,9 @@ externalCachingRedis:
   existingSecretName: ""
   existingSecretKey: redis-password
 
-## Sentinal redis settings
-# These are used if useSentinalRedis is true, and are ignored otherwise
-sentinalTasksRedis:
+## Sentinel redis settings
+# These are used if useSentinelRedis is true, and are ignored otherwise
+sentinelTasksRedis:
   sentinels: []
   sentinelService: netbox-redis
   sentinelTimeout: 300
@@ -670,7 +687,7 @@ sentinalTasksRedis:
   existingSecretName: ""
   existingSecretKey: redis-password
 
-sentinalCachingRedis:
+sentinelCachingRedis:
   sentinels: []
   sentinelService: netbox-redis
   sentinelTimeout: 300
