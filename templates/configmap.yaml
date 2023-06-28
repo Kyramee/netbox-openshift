@@ -1,0 +1,366 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "netbox.fullname" . }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+{{ include "netbox.labels" . | indent 4 }}
+data:
+  configuration.py: |
+    import re
+    import yaml
+
+    from pathlib import Path
+
+    def _deep_merge(source, destination):
+      """Inspired by https://stackoverflow.com/a/20666342"""
+      for key, value in source.items():
+        dst_value = destination.get(key)
+
+        if isinstance(value, dict) and isinstance(dst_value, dict):
+          _deep_merge(value, dst_value)
+        else:
+          destination[key] = value
+
+      return destination
+
+    def _load_yaml():
+      extraConfigBase = Path('/run/config/extra')
+      configFiles = [Path('/run/config/netbox/netbox.yaml')]
+
+      configFiles.extend(sorted(extraConfigBase.glob('*/*.yaml')))
+
+      for configFile in configFiles:
+        with open(configFile, 'r') as f:
+          config = yaml.safe_load(f)
+
+        _deep_merge(config, globals())
+
+    def _load_secret(name, key):
+      path = "/run/secrets/{name}/{key}".format(name=name, key=key)
+      with open(path, 'r') as f:
+        return f.read()
+
+    _load_yaml()
+
+    DATABASE['PASSWORD'] = _load_secret('netbox', 'db_password')
+    EMAIL['PASSWORD'] = _load_secret('netbox', 'email_password')
+    NAPALM_PASSWORD = _load_secret('netbox', 'napalm_password')
+    REDIS['tasks']['PASSWORD'] = _load_secret('netbox', 'redis_tasks_password')
+    REDIS['caching']['PASSWORD'] = _load_secret('netbox', 'redis_cache_password')
+    SECRET_KEY = _load_secret('netbox', 'secret_key')
+
+    # Post-process certain values
+    CORS_ORIGIN_REGEX_WHITELIST = [re.compile(r) for r
+                                   in CORS_ORIGIN_REGEX_WHITELIST]
+    {{- if and (not .Values.useBundleRedis) .Values.tasksRedis.sentinels }}
+    REDIS['tasks']['SENTINELS'] = [tuple(x.split(r":")) for x
+                                   in REDIS['tasks']['SENTINELS']]
+    {{- end }}
+    {{- if and (not .Values.useBundleRedis) .Values.cachingRedis.sentinels }}
+    REDIS['caching']['SENTINELS'] = [tuple(x.split(r":")) for x
+                                     in REDIS['caching']['SENTINELS']]
+    {{- end }}
+
+  netbox.yaml: |
+    # -------------------------------------------------------------------------
+    # Required Configuration Settings
+    # https://docs.netbox.dev/en/stable/configuration/required-parameters/
+    # -------------------------------------------------------------------------
+    
+    ALLOWED_HOSTS: {{ toJson .Values.allowedHosts }}
+
+    DATABASE:
+      {{ if .Values.useBundlePostgresql -}}
+      HOST: {{ include "postgresql.primary.fullname" .Subcharts.postgresql | quote }}
+      USER: {{ include "postgresql.username" .Subcharts.postgresql | quote }}
+      NAME: {{ include "postgresql.database" .Subcharts.postgresql | quote }}
+      PORT: {{ include "postgresql.service.port" .Subcharts.postgresql | int }}
+      {{- else -}}
+      HOST: {{ .Values.externalDatabase.host | quote }}
+      USER: {{ .Values.externalDatabase.username | quote }}
+      NAME: {{ .Values.externalDatabase.database | quote }}
+      PORT: {{ .Values.externalDatabase.port | int }}
+      {{- end }}
+      OPTIONS:
+        sslmode: {{ .Values.externalDatabase.sslMode | quote }}
+        target_session_attrs: {{ .Values.externalDatabase.targetSessionAttrs | default "read-write" | quote }}
+      CONN_MAX_AGE: {{ .Values.externalDatabase.connMaxAge | int }}
+      DISABLE_SERVER_SIDE_CURSORS: {{ toJson .Values.externalDatabase.disableServerSideCursors }}
+
+    REDIS:
+      tasks:
+        {{- if .Values.useBundleRedis }}
+        HOST: {{ printf "%s-master" (include "common.names.fullname" .Subcharts.redis) | quote }}
+        PORT: {{ .Values.redis.master.service.ports.redis | int }}
+        USERNAME: {{ .Values.tasksRedis.username | quote }}
+        DATABASE: {{ int .Values.tasksRedis.database }}
+        SSL: {{ toJson .Values.tasksRedis.ssl }}
+        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.tasksRedis.insecureSkipTlsVerify }}
+        CA_CERT_PATH: {{ .Values.tasksRedis.caCertPath | quote }}
+        {{- else if .Values.useExternalRedis }}
+        HOST: {{ .Values.tasksRedis.host | quote }}
+        PORT: {{ .Values.tasksRedis.port | int }}
+        USERNAME: {{ .Values.externalTasksRedis.username | quote }}
+        DATABASE: {{ int .Values.externalTasksRedis.database }}
+        SSL: {{ toJson .Values.externalTasksRedis.ssl }}
+        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.externalTasksRedis.insecureSkipTlsVerify }}
+        CA_CERT_PATH: {{ .Values.externalTasksRedis.caCertPath | quote }}
+        {{- else if .Values.useSentinalRedis }}
+        SENTINELS: {{ toJson .Values.sentinalTasksRedis.sentinels }}
+        SENTINEL_SERVICE: {{ .Values.sentinalTasksRedis.sentinelService | quote }}
+        SENTINEL_TIMEOUT: {{ .Values.sentinalTasksRedis.sentinelTimeout | int }}
+        USERNAME: {{ .Values.sentinalTasksRedis.username | quote }}
+        DATABASE: {{ int .Values.sentinalTasksRedis.database }}
+        SSL: {{ toJson .Values.sentinalTasksRedis.ssl }}
+        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.sentinalTasksRedis.insecureSkipTlsVerify }}
+        CA_CERT_PATH: {{ .Values.sentinalTasksRedis.caCertPath | quote }}
+        {{- end }}
+        
+      caching:
+        {{- if .Values.useBundleRedis }}
+        HOST: {{ printf "%s-master" (include "common.names.fullname" .Subcharts.redis) | quote }}
+        PORT: {{ .Values.redis.master.service.ports.redis | int }}
+        USERNAME: {{ .Values.cachingRedis.username | quote }}
+        DATABASE: {{ int .Values.cachingRedis.database }}
+        SSL: {{ toJson .Values.cachingRedis.ssl }}
+        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.cachingRedis.insecureSkipTlsVerify }}
+        CA_CERT_PATH: {{ .Values.cachingRedis.caCertPath | quote }}
+        {{- else if .Values.useExternalRedis }}
+        HOST: {{ .Values.externalCachingRedis.host | quote }}
+        PORT: {{ .Values.externalCachingRedis.port | int }}
+        USERNAME: {{ .Values.externalexternalCachingRedis.username | quote }}
+        DATABASE: {{ int .Values.externalexternalCachingRedis.database }}
+        SSL: {{ toJson .Values.externalexternalCachingRedis.ssl }}
+        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.externalexternalCachingRedis.insecureSkipTlsVerify }}
+        CA_CERT_PATH: {{ .Values.externalexternalCachingRedis.caCertPath | quote }}
+        {{- else if .Values.useSentinalRedis }}
+        SENTINELS: {{ toJson .Values.sentinalCachingRedis.sentinels }}
+        SENTINEL_SERVICE: {{ .Values.sentinalCachingRedis.sentinelService | quote }}
+        SENTINEL_TIMEOUT: {{ .Values.sentinalCachingRedis.sentinelTimeout | int }}
+        USERNAME: {{ .Values.sentinalCachingRedis.username | quote }}
+        DATABASE: {{ int .Values.sentinalCachingRedis.database }}
+        SSL: {{ toJson .Values.sentinalCachingRedis.ssl }}
+        INSECURE_SKIP_TLS_VERIFY: {{ toJson .Values.sentinalCachingRedis.insecureSkipTlsVerify }}
+        CA_CERT_PATH: {{ .Values.sentinalCachingRedis.caCertPath | quote }}
+        {{- end }}
+    
+    # -------------------------------------------------------------------------
+    # System
+    # https://docs.netbox.dev/en/stable/configuration/system/
+    # -------------------------------------------------------------------------
+   
+    BASE_PATH: {{ .Values.basePath | quote }}
+    DEFAULT_LANGUAGE: {{ .Values.defaultLanguage | quote }}
+
+    EMAIL:
+      SERVER: {{ .Values.email.server | quote }}
+      PORT: {{ .Values.email.port | int }}
+      USERNAME: {{ .Values.email.username | quote }}
+      USE_SSL: {{ toJson .Values.email.useSSL }}
+      USE_TLS: {{ toJson .Values.email.useTLS }}
+      SSL_CERTFILE: {{ .Values.email.sslCertFile | quote }}
+      SSL_KEYFILE: {{ .Values.email.sslKeyFile | quote }}
+      TIMEOUT: {{ .Values.email.timeout | int }}
+      FROM_EMAIL: {{ toJson .Values.email.from }}
+
+    ENABLE_LOCALIZATION: {{ toJson .Values.enableLocalization }}
+    HTTP_PROXIES: {{ toJson .Values.httpProxies }}
+    INTERNAL_IPS: {{ toJson .Values.internalIPs }}
+    LOGGING: {{ toJson .Values.logging }}
+    MEDIA_ROOT: {{ .Values.mediaRoot | quote }}
+    REPORTS_ROOT: {{ .Values.reportsRoot | quote }}
+    SCRIPTS_ROOT: {{ .Values.scriptsRoot | quote }}
+    STORAGE_BACKEND: {{ .Values.storageBackend | quote }}
+    STORAGE_CONFIG:  {{ toJson .Values.storageConfig }}
+    
+    # -------------------------------------------------------------------------
+    # Security & Authentication Parameters
+    # https://docs.netbox.dev/en/stable/configuration/security/
+    # -------------------------------------------------------------------------
+    
+    ALLOW_TOKEN_RETRIEVAL: {{ toJson .Values.allowTokenRetrieval }}
+    ALLOWED_URL_SCHEMES: {{ toJson .Values.allowedUrlSchemes }}
+    AUTH_PASSWORD_VALIDATORS: {{ toJson .Values.authPasswordValidators }}
+    CORS_ORIGIN_ALLOW_ALL: {{ toJson .Values.corsOriginAllowAll }}
+    CORS_ORIGIN_WHITELIST: {{ toJson .Values.corsOriginWhitelist }}
+    CORS_ORIGIN_REGEX_WHITELIST: {{ toJson .Values.corsOriginRegexWhitelist }}
+    CSRF_COOKIE_NAME: {{ .Values.csrfCookieName | quote }}
+    CSRF_TRUSTED_ORIGINS: {{ toJson .Values.csrfTrustedOrigins }}
+    EXEMPT_VIEW_PERMISSIONS: {{ toJson .Values.exemptViewPermissions }}
+    LOGIN_PERSISTENCE: {{ toJson .Values.loginPersistence }}
+    LOGIN_REQUIRED: {{ toJson .Values.loginRequired }}
+    LOGIN_TIMEOUT: {{ int .Values.loginTimeout }}
+    LOGOUT_REDIRECT_URL: {{ .Values.logoutRedirectUrl | quote }}
+    SESSION_COOKIE_NAME: {{ .Values.sessionCookieName }}
+    
+    # -------------------------------------------------------------------------
+    # Remote Authentication Settings
+    # https://docs.netbox.dev/en/stable/configuration/remote-authentication/
+    # -------------------------------------------------------------------------
+    
+    REMOTE_AUTH_AUTO_CREATE_USER: {{ toJson .Values.remoteAuthAutoCreateUser }}
+    REMOTE_AUTH_BACKEND: {{ .Values.remoteAuthBackend | quote }}
+    REMOTE_AUTH_DEFAULT_GROUPS: {{ toJson .Values.remoteAuthDefaultGroups }}
+    REMOTE_AUTH_DEFAULT_PERMISSIONS: {{ toJson .Values.remoteAuthDefaultPermissions }}
+    REMOTE_AUTH_ENABLED: {{ toJson .Values.remoteAuthEnabled }}
+    REMOTE_AUTH_GROUP_HEADER: {{ .Values.remoteAuthGroupHeader | quote }}
+    REMOTE_AUTH_GROUP_SEPARATOR: {{ .Values.remoteAuthGroupSeparator | quote }}
+    REMOTE_AUTH_GROUP_SYNC_ENABLED: {{ toJson .Values.remoteAuthGroupSyncEnabled }}
+    REMOTE_AUTH_HEADER: {{ .Values.remoteAuthHeader | quote }}
+    REMOTE_AUTH_SUPERUSER_GROUPS: {{ toJson .Values.remoteAuthSuperuserGroups }}
+    REMOTE_AUTH_SUPERUSERS: {{ toJson .Values.remoteAuthSuperusers }}
+    REMOTE_AUTH_STAFF_GROUPS: {{ toJson .Values.remoteAuthStaffGroups }}
+    REMOTE_AUTH_STAFF_USERS: {{ toJson .Values.remoteAuthStaffUsers }}
+    
+    # -------------------------------------------------------------------------
+    # Data & Validation Parameters
+    # https://docs.netbox.dev/en/stable/configuration/data-validation/
+    # -------------------------------------------------------------------------
+    
+    CUSTOM_VALIDATORS: {{ toJson .Values.customValidators }}
+    FIELD_CHOICES: {{ toJson .Values.fieldChoices }}
+
+    # -------------------------------------------------------------------------
+    # Default Value Parameters
+    # https://docs.netbox.dev/en/stable/configuration/default-values/
+    # -------------------------------------------------------------------------
+    
+    DEFAULT_USER_PREFERENCES: {{ toJson .Values.defaultUserPreferences }}
+    PAGINATE_COUNT: {{ int .Values.paginateCount }}
+    POWERFEED_DEFAULT_AMPERAGE: {{ int .Values.powerFeedDefaultAmperage }}
+    POWERFEED_DEFAULT_MAX_UTILIZATION: {{ int .Values.powerFeedMaxUtilisation }}
+    POWERFEED_DEFAULT_VOLTAGE: {{ int .Values.powerFeedDefaultVoltage }}
+    RACK_ELEVATION_DEFAULT_UNIT_HEIGHT: {{ int .Values.rackElevationDefaultUnitHeight }}
+    RACK_ELEVATION_DEFAULT_UNIT_WIDTH: {{ int .Values.rackElevationDefaultUnitWidth }}
+    
+    # -------------------------------------------------------------------------
+    # Plugin Parameters
+    # https://docs.netbox.dev/en/stable/configuration/plugins/
+    # -------------------------------------------------------------------------
+    
+    PLUGINS: {{ toJson .Values.plugins }}
+    PLUGINS_CONFIG: {{ toJson .Values.pluginsConfig }}
+    
+    # -------------------------------------------------------------------------
+    # Date & Time Parameters
+    # https://docs.netbox.dev/en/stable/configuration/date-time/
+    # -------------------------------------------------------------------------
+    
+    TIME_ZONE: {{ .Values.timeZone | quote }}
+    DATE_FORMAT: {{ .Values.dateFormat | quote }}
+    SHORT_DATE_FORMAT: {{ .Values.shortDateFormat | quote }}
+    TIME_FORMAT: {{ .Values.timeFormat | quote }}
+    SHORT_TIME_FORMAT: {{ .Values.shortTimeFormat | quote }}
+    DATETIME_FORMAT: {{ .Values.dateTimeFormat | quote }}
+    SHORT_DATETIME_FORMAT: {{ .Values.shortDateTimeFormat | quote }}
+    
+    # -------------------------------------------------------------------------
+    # Miscellaneous Parameters
+    # https://docs.netbox.dev/en/stable/configuration/miscellaneous/
+    # -------------------------------------------------------------------------
+    
+    ADMINS: {{ toJson .Values.admins }}
+    BANNER_BOTTOM: {{ .Values.banner.bottom | quote }}
+    BANNER_LOGIN: {{ .Values.banner.login | quote }}
+    BANNER_TOP: {{ .Values.banner.top | quote }}
+    CHANGELOG_RETENTION: {{ int .Values.changelogRetention }}
+    ENFORCE_GLOBAL_UNIQUE: {{ toJson .Values.enforceGlobalUnique }}
+    GRAPHQL_ENABLED: {{ toJson .Values.graphQlEnabled }}
+    JOBRESULT_RETENTION: {{ int .Values.jobResultRetention }} # param name is "JOB_RETENTION" in 3.5 and later version 
+    MAINTENANCE_MODE: {{ toJson .Values.maintenanceMode }}
+    MAPS_URL: {{ .Values.mapsUrl | quote }}
+    MAX_PAGE_SIZE: {{ int .Values.maxPageSize }}
+    METRICS_ENABLED: {{ toJson .Values.metricsEnabled }}
+    PREFER_IPV4: {{ toJson .Values.preferIPv4 }}
+    RELEASE_CHECK_URL: {{ toJson .Values.releaseCheckUrl }}
+    RQ_DEFAULT_TIMEOUT: {{ .Values.rqDefaultTimeout | int }}
+
+    # -------------------------------------------------------------------------
+    # Development Parameters
+    # https://docs.netbox.dev/en/stable/configuration/development/
+    # -------------------------------------------------------------------------
+    
+    DEBUG: {{ toJson .Values.debug }}
+
+    # -------------------------------------------------------------------------
+    # Removed in later verions
+    # -------------------------------------------------------------------------
+
+    NAPALM_USERNAME: {{ .Values.napalm.username | quote }}
+    NAPALM_TIMEOUT: {{ int .Values.napalm.timeout }}
+    NAPALM_ARGS: {{ toJson .Values.napalm.args }}
+
+  {{- if eq .Values.remoteAuth.backend "netbox.authentication.LDAPBackend" }}
+
+  ldap_config.py: |
+    import yaml
+    import ldap
+    from django_auth_ldap.config import LDAPSearch
+    from importlib import import_module
+    def _load_yaml():
+      with open('/run/config/netbox/ldap.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+      globals().update(config)
+    def _load_secret(name, key):
+      path = "/run/secrets/{name}/{key}".format(name=name, key=key)
+      with open(path, 'r') as f:
+        return f.read()
+    # Import and return the group type based on string name
+    def _import_group_type(group_type_name):
+        mod = import_module('django_auth_ldap.config')
+        try:
+            return getattr(mod, group_type_name)()
+        except:
+            return None
+    _load_yaml()
+    AUTH_LDAP_BIND_PASSWORD = _load_secret('netbox', 'ldap_bind_password')
+    # The following may be needed if you are binding to Active Directory.
+    AUTH_LDAP_CONNECTION_OPTIONS = {
+        ldap.OPT_REFERRALS: 0
+    }
+    AUTH_LDAP_USER_SEARCH = LDAPSearch(AUTH_LDAP_USER_SEARCH_BASEDN,
+                                      ldap.SCOPE_SUBTREE,
+                                      "(" + AUTH_LDAP_USER_SEARCH_ATTR + "=%(user)s)")
+    AUTH_LDAP_GROUP_SEARCH = LDAPSearch(AUTH_LDAP_GROUP_SEARCH_BASEDN, ldap.SCOPE_SUBTREE,
+                                  "(objectClass=" + AUTH_LDAP_GROUP_SEARCH_CLASS + ")")
+    AUTH_LDAP_GROUP_TYPE = _import_group_type(AUTH_LDAP_GROUP_TYPE)
+    # Define special user types using groups. Exercise great caution when assigning superuser status.
+    AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+        "is_active": AUTH_LDAP_REQUIRE_GROUP,
+        "is_staff": {{ .Values.ldapIsAdminDn | quote }},
+        "is_superuser": {{ .Values.ldapIsSuperUserDn | quote }}
+    }
+    # Populate the Django user from the LDAP directory.
+    AUTH_LDAP_USER_ATTR_MAP = {
+        "first_name": {{ .Values.ldapAttrFirstName | quote }},
+        "last_name": {{ .Values.ldapAttrLastName | quote }},
+        "email": {{ .Values.ldapAttrMail | quote }}
+    }
+
+  ldap.yaml: |
+    AUTH_LDAP_SERVER_URI: {{ .Values.ldapServerUri | quote }}
+    AUTH_LDAP_BIND_DN: {{ .Values.ldapBindDn | quote }}
+    AUTH_LDAP_START_TLS: {{ toJson .Values.ldapStartTls }}
+    LDAP_IGNORE_CERT_ERRORS: {{ toJson .Values.ldapIgnoreCertErrors }}
+    AUTH_LDAP_USER_DN_TEMPLATE: {{ default nil .Values.ldapUserDnTemplate }}
+    AUTH_LDAP_USER_SEARCH_BASEDN: {{ .Values.ldapUserSearchBaseDn | quote }}
+    AUTH_LDAP_USER_SEARCH_ATTR: {{ .Values.ldapUserSearchAttr | quote }}
+    AUTH_LDAP_GROUP_SEARCH_BASEDN: {{ .Values.ldapGroupSearchBaseDn | quote }}
+    AUTH_LDAP_GROUP_SEARCH_CLASS: {{ .Values.ldapGroupSearchClass | quote }}
+    AUTH_LDAP_GROUP_TYPE: {{ .Values.ldapGroupType | quote }}
+    AUTH_LDAP_REQUIRE_GROUP: {{ .Values.ldapRequireGroupDn | quote }}
+    AUTH_LDAP_FIND_GROUP_PERMS: {{ toJson .Values.ldapFindGroupPerms }}
+    AUTH_LDAP_MIRROR_GROUPS: {{ toJson .Values.ldapMirrorGroups }}
+    AUTH_LDAP_MIRROR_GROUPS_EXCEPT: {{ toJson .Values.ldapMirrorGroupsExcept }}
+    AUTH_LDAP_CACHE_TIMEOUT: {{ int .Values.ldapCacheTimeout }}
+  {{- end }}
+  {{ range $index, $config := .Values.extraConfig -}}
+  {{- if $config.values }}
+  extra-{{ $index }}.yaml: |
+    {{- toYaml $config.values | nindent 4 }}
+  {{- end }}
+  {{ end -}}

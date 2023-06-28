@@ -1,0 +1,20 @@
+apiVersion: v2
+name: netbox
+version: 0.0.2
+appVersion: v3.4.4
+description: IP address management (IPAM) and data center infrastructure management (DCIM) tool
+home: https://github.com/Kyramee/netbox-openshift
+icon: https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.png
+maintainers:
+- name: Adrien Côté-Laferrière
+  email: adrienthereader@gmail.com
+  url: https://github.com/Kyramee
+dependencies:
+- name: postgresql
+  version: 12.x.x
+  repository: https://charts.bitnami.com/bitnami
+  condition: useBundlePostgresql
+- name: redis
+  version: 17.x.x
+  repository: https://charts.bitnami.com/bitnami
+  condition: useBundleRedis
