@@ -587,6 +587,16 @@ postgresql:
   auth:
     username: netbox
     database: netbox
+  primary:
+    podSecurityContext:
+      fsGroup:
+    containerSecurityContext:
+      runAsUser:
+  readReplicas:
+    podSecurityContext:
+      fsGroup:
+    containerSecurityContext:
+      runAsUser:
 
 ## External database settings
 # These are used if useBundlePostgresql is false, and are ignored otherwise
