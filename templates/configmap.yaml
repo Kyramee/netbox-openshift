@@ -264,9 +264,9 @@ data:
     # -------------------------------------------------------------------------
     
     ADMINS: {{ toJson .Values.admins }}
-    BANNER_BOTTOM: {{ .Values.banner.bottom | quote }}
-    BANNER_LOGIN: {{ .Values.banner.login | quote }}
-    BANNER_TOP: {{ .Values.banner.top | quote }}
+    BANNER_BOTTOM: {{ .Values.bannerBottom | quote }}
+    BANNER_LOGIN: {{ .Values.bannerLogin | quote }}
+    BANNER_TOP: {{ .Values.bannerTop | quote }}
     CHANGELOG_RETENTION: {{ int .Values.changelogRetention }}
     ENFORCE_GLOBAL_UNIQUE: {{ toJson .Values.enforceGlobalUnique }}
     GRAPHQL_ENABLED: {{ toJson .Values.graphQlEnabled }}
