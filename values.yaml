@@ -587,6 +587,8 @@ postgresql:
   auth:
     username: netbox
     database: netbox
+  # For OpenShift, it is important that fsGroup and runAsUser fields are kept EMPTY unless
+  # you you know what you are doing with uid and SCC
   primary:
     podSecurityContext:
       fsGroup:
@@ -619,6 +621,8 @@ externalDatabase:
 # values.yaml file. See the bitnami values.yaml file here:
 # https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
 redis:
+  # For OpenShift, it is important that fsGroup and runAsUser fields are kept EMPTY unless
+  # you you know what you are doing with uid and SCC
   master:
     podSecurityContext:
       fsGroup:
