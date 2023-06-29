@@ -1,4 +1,4 @@
-{{- if .Values.housekeeping.enabled -}}
+{{- if .Values.useNetboxHousekeeping -}}
 {{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: batch/v1
 {{- else -}}
