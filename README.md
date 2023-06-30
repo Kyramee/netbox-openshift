@@ -208,7 +208,7 @@ The following table lists the configurable parameters for this chart and their d
 | `rackElevationDefaultUnitHeight`                | Rack elevation default height in pixels                             | `22`                                         |
 | `rackElevationDefaultUnitWidth`                 | Rack elevation default width in pixels                              | `220`                                        |
 | `remoteAuth.enabled`                            | Enable remote authentication support                                | `false`                                      |
-| `remoteAuth.backend`                            | Remote authentication backend class                                 | `netbox.authentication.RemoteUserBackend`    |
+| `remoteAuthBackendd`                            | Remote authentication backend class                                 | `netbox.authentication.RemoteUserBackend`    |
 | `remoteAuth.header`                             | The name of the HTTP header which conveys the username              | `HTTP_REMOTE_USER`                           |
 | `remoteAuth.autoCreateUser`                     | Enables the automatic creation of new users                         | `true`                                       |
 | `remoteAuth.defaultGroups`                      | A list of groups to assign to newly created users                   | `[]`                                         |
@@ -301,7 +301,7 @@ The following table lists the configurable parameters for this chart and their d
 | `cachingRedis.password`                         | Password for external Redis (see also `existingSecret`)             | `""`                                         |
 | `cachingRedis.existingSecretName`               | Fetch password for external Redis from a different `Secret`         | `""`                                         |
 | `cachingRedis.existingSecretKey`                | Key to fetch the password in the above `Secret`                     | `redis-password`                             |
-| `imagePullSecrets`                              | List of `Secret` names containing private registry credentials      | `[]`                                         |
+| `image.imagePullSecrets`                              | List of `Secret` names containing private registry credentials      | `[]`                                         |
 | `nameOverride`                                  | Override the application name (`netbox`) used throughout the chart  | `""`                                         |
 | `fullnameOverride`                              | Override the full name of resources created as part of the release  | `""`                                         |
 | `serviceAccount.create`                         | Create a ServiceAccount for NetBox                                  | `true`                                       |
@@ -347,11 +347,11 @@ The following table lists the configurable parameters for this chart and their d
 | `readinessProbe.timeoutSeconds`                 | Number of seconds                                                   |  *see `values.yaml`*                         |
 | `readinessProbe.periodSeconds`                  | Number of seconds                                                   |  *see `values.yaml`*                         |
 | `readinessProbe.successThreshold`               | Number of seconds                                                   |  *see `values.yaml`*                         |
-| `init.image.repository`                         | Init container image repository                                     | `busybox`                                    |
-| `init.image.tag`                                | Init container image tag                                            | `1.32.1`                                     |
-| `init.image.pullPolicy`                         | Init container image pull policy                                    | `IfNotPresent`                               |
-| `init.resources`                                | Configure resource requests or limits for init container            | `{}`                                         |
-| `init.securityContext`                          | Security context for init container                                 | *see `values.yaml`*                          |
+| `initContainers.image.repository`                         | Init container image repository                                     | `busybox`                                    |
+| `initContainers.image.tag`                                | Init container image tag                                            | `1.32.1`                                     |
+| `initContainers.image.pullPolicy`                         | Init container image pull policy                                    | `IfNotPresent`                               |
+| `initContainers.resources`                                | Configure resource requests or limits for init container            | `{}`                                         |
+| `initContainers.securityContext`                          | Security context for init container                                 | *see `values.yaml`*                          |
 | `autoscaling.enabled`                           | Whether to enable the HorizontalPodAutoscaler                       | `false`                                      |
 | `autoscaling.minReplicas`                       | Minimum number of replicas when autoscaling is enabled              | `1`                                          |
 | `autoscaling.maxReplicas`                       | Maximum number of replicas when autoscaling is enabled              | `100`                                        |
@@ -460,7 +460,7 @@ this, the `Secret` must contain the following keys:
 | -----------------------|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
 | `db_password`          | The password for the external PostgreSQL database             | If `postgresql.enabled` is `false` and `externalDatabase.existingSecretName` is unset             |
 | `email_password`       | SMTP user password                                            | Yes, but the value may be left blank if not required                                              |
-| `ldap_bind_password`   | Password for LDAP bind DN                                     | If `remoteAuth.enabled` is `true` and `remoteAuth.backend` is `netbox.authentication.LDAPBackend` |
+| `ldap_bind_password`   | Password for LDAP bind DN                                     | If `remoteAuth.enabled` is `true` and remoteAuthBackendnd` is `netbox.authentication.LDAPBackend` |
 | `napalm_password`      | NAPALM user password                                          | Yes, but the value may be left blank if not required                                              |
 | `redis_tasks_password` | Password for the external Redis tasks database                | If `redis.enabled` is `false` and `tasksRedis.existingSecretName` is unset                        |
 | `redis_cache_password` | Password for the external Redis cache database                | If `redis.enabled` is `false` and `cachingRedis.existingSecretName` is unset                      |

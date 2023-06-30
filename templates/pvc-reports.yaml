@@ -1,4 +1,4 @@
-{{- if and .Values.reportsPersistence.enabled (not .Values.reportsPersistence.existingClaim) -}}
+{{- if and .Values.persistence.reports.enabled (not .Values.persistence.reports.existingClaim) -}}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -11,18 +11,18 @@ metadata:
 {{ include "netbox.labels" . | indent 4 }}
 spec:
   accessModes:
-    - {{ .Values.reportsPersistence.accessMode | quote }}
+    - {{ .Values.persistence.reports.accessMode | quote }}
   resources:
     requests:
-      storage: {{ .Values.reportsPersistence.size | quote }}
-{{- if .Values.reportsPersistence.storageClass }}
-{{- if (eq "-" .Values.reportsPersistence.storageClass) }}
+      storage: {{ .Values.persistence.reports.size | quote }}
+{{- if .Values.persistence.reports.storageClass }}
+{{- if (eq "-" .Values.persistence.reports.storageClass) }}
   storageClassName: ""
 {{- else }}
-  storageClassName: {{ .Values.reportsPersistence.storageClass | quote }}
+  storageClassName: {{ .Values.persistence.reports.storageClass | quote }}
 {{- end }}
 {{- end }}
-{{- if .Values.reportsPersistence.selector }}
-  selector: {{ toYaml .Values.reportsPersistence.selector | nindent 4 }}
+{{- if .Values.persistence.reports.selector }}
+  selector: {{ toYaml .Values.persistence.reports.selector | nindent 4 }}
 {{- end }}
 {{- end -}}

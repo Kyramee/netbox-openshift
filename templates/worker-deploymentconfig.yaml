@@ -1,7 +1,7 @@
-{{- if .Values.worker.enabled }}
+{{- if .Values.useNetboxWorker }}
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
 metadata:
   name: {{ include "netbox.fullname" . }}-worker
   {{- with .Values.commonAnnotations }}
@@ -12,7 +12,7 @@ metadata:
     {{- include "netbox.labels" . | nindent 4 }}
     app.kubernetes.io/component: worker
 spec:
-{{- if not .Values.worker.autoscaling.enabled }}
+{{- if not .Values.workerAutoscaling.enabled }}
   replicas: {{ .Values.worker.replicaCount }}
 {{- end }}
   selector:
@@ -40,8 +40,8 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
+      {{- with .Values.image.imagePullSecrets }}
+      image.imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "netbox.serviceAccountName" . }}
@@ -54,14 +54,14 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-worker
           securityContext:
-            {{- toYaml .Values.worker.securityContext | nindent 12 }}
+            {{- toYaml .Values.worker.containers.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           command:
             - /opt/netbox/venv/bin/python
             - /opt/netbox/netbox/manage.py
             - rqworker
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- with .Values.worker.extraEnvs }}
+          {{- with .Values.worker.containers.extraEnvs }}
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -93,14 +93,14 @@ spec:
               mountPath: /opt/netbox/netbox/reports
               subPath: {{ .Values.reportsPersistence.subPath | default "" | quote }}
             {{- end }}
-            {{- with .Values.worker.extraVolumeMounts }}
+            {{- with .Values.worker.containers.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if .Values.worker.resources }}
+          {{- if .Values.worker.containers.resources }}
           resources:
-            {{- toYaml .Values.worker.resources | nindent 12 }}
+            {{- toYaml .Values.worker.containers.resources | nindent 12 }}
           {{- end }}
-        {{- with .Values.worker.extraContainers }}
+        {{- with .Values.worker.containers.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       volumes:
