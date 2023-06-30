@@ -47,7 +47,7 @@ spec:
         {{- toYaml .Values.deploymentConfig.podSecurityContext | nindent 8 }}
       initContainers:
         - name: init-dirs
-          image: "{{ .Values.initContainers.image.repository }}:{{ .Values.initContainers.image.tag }}"
+          image: "{{ .Values.deploymentConfig.initContainers.image.repository }}:{{ .Values.deploymentConfig.initContainers.image.tag }}"
           imagePullPolicy: {{ .Values.deploymentConfig.initContainers.image.pullPolicy }}
           command: [/bin/sh, -c, mkdir -p /opt/unit/state /opt/unit/tmp]
           {{- if .Values.deploymentConfig.initContainers.resources }}
