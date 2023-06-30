@@ -86,7 +86,7 @@ spec:
                 - name: media
                   mountPath: /opt/netbox/netbox/media
                   subPath: {{ .Values.persistence.subPath | default "" | quote }}
-                {{- if .Values.reportsPersistence.enabled }}
+                {{- if .Values.persistence.reports.enabled }}
                 - name: reports
                   mountPath: /opt/netbox/netbox/reports
                   subPath: {{ .Values.reportsPersistence.subPath | default "" | quote }}
@@ -148,7 +148,7 @@ spec:
               {{- else }}
               emptyDir: {}
               {{- end }}
-            {{- if .Values.reportsPersistence.enabled }}
+            {{- if .Values.persistence.reports.enabled }}
             - name: reports
               persistentVolumeClaim:
                 claimName: {{ .Values.reportsPersistence.existingClaim | default (printf "%s-reports" (include "netbox.fullname" .)) }}
