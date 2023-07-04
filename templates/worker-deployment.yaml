@@ -1,25 +1,27 @@
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+{{- if .Values.useNetboxWorker }}
+---
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: {{ include "netbox.fullname" . }}
+  name: {{ include "netbox.fullname" . }}-worker
   {{- with .Values.commonAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   labels:
     {{- include "netbox.labels" . | nindent 4 }}
-    app.kubernetes.io/component: netbox
+    app.kubernetes.io/component: worker
 spec:
-{{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.deploymentConfig.replicaCount }}
+{{- if not .Values.workerAutoscaling.enabled }}
+  replicas: {{ .Values.worker.replicaCount }}
 {{- end }}
   selector:
     matchLabels:
       {{- include "netbox.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: netbox
-  {{ if .Values.deploymentConfig.updateStrategy -}}
+      app.kubernetes.io/component: worker
+  {{ if .Values.worker.updateStrategy -}}
   strategy:
-    {{- toYaml .Values.deploymentConfig.updateStrategy | nindent 4 }}
+    {{- toYaml .Values.worker.updateStrategy | nindent 4 }}
   {{ end -}}
   template:
     metadata:
@@ -28,13 +30,13 @@ spec:
         {{- if (not .Values.existingSecret) }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- end }}
-        {{- with .Values.deploymentConfig.podAnnotations }}
+        {{- with .Values.worker.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
         {{- include "netbox.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: netbox
-        {{- with .Values.deploymentConfig.podLabels }}
+        app.kubernetes.io/component: worker
+        {{- with .Values.worker.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -44,62 +46,24 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "netbox.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.deploymentConfig.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.worker.podSecurityContext | nindent 8 }}
+      {{- with .Values.worker.extraInitContainers }}
       initContainers:
-        - name: init-dirs
-          image: "{{ .Values.deploymentConfig.initContainers.image.repository }}:{{ .Values.deploymentConfig.initContainers.image.tag }}"
-          imagePullPolicy: {{ .Values.deploymentConfig.initContainers.image.pullPolicy }}
-          command: [/bin/sh, -c, mkdir -p /opt/unit/state /opt/unit/tmp]
-          {{- if .Values.deploymentConfig.initContainers.resources }}
-          resources:
-            {{- toYaml .Values.deploymentConfig.initContainers.resources | nindent 12 }}
-          {{- end }}
-          securityContext:
-            {{- toYaml .Values.deploymentConfig.initContainers.securityContext | nindent 12 }}
-          volumeMounts:
-            - name: optunit
-              mountPath: /opt/unit
-        {{- with .Values.deploymentConfig.initContainers.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Chart.Name }}-worker
           securityContext:
-            {{- toYaml .Values.deploymentConfig.containers.securityContext | nindent 12 }}
+            {{- toYaml .Values.worker.containers.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command:
+            - /opt/netbox/venv/bin/python
+            - /opt/netbox/netbox/manage.py
+            - rqworker
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.worker.containers.extraEnvs }}
           env:
-            - name: SUPERUSER_NAME
-              value: {{ .Values.superuser.name | quote }}
-            - name: SUPERUSER_EMAIL
-              value: {{ .Values.superuser.email | quote }}
-            - name: SKIP_STARTUP_SCRIPTS
-              value: {{ .Values.deploymentConfig.containers.skipStartupScripts | quote }}
-            {{- if .Values.deploymentConfig.containers.dbWaitDebug }}
-            - name: DB_WAIT_DEBUG
-              value: "1"
-            {{- end }}
-            {{- with .Values.deploymentConfig.containers.extraEnvs }}
             {{- toYaml . | nindent 12 }}
-            {{- end }}
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-          {{- if .Values.deploymentConfig.containers.readinessProbe.enabled }}
-          readinessProbe:
-            httpGet:
-              path: /{{ .Values.basePath }}login/
-              port: http
-              {{- if (not (eq (index .Values.allowedHosts 0) "*")) }}
-              httpHeaders:
-                - name: Host
-                  value: {{ (index .Values.allowedHosts 0) | quote }}
-              {{- end }}
-            initialDelaySeconds: {{ .Values.deploymentConfig.containers.readinessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .Values.deploymentConfig.containers.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.deploymentConfig.containers.readinessProbe.successThreshold }}
-            periodSeconds: {{ .Values.deploymentConfig.containers.readinessProbe.periodSeconds }}
           {{- end }}
           volumeMounts:
             - name: config
@@ -129,24 +93,14 @@ spec:
               mountPath: /opt/netbox/netbox/reports
               subPath: {{ .Values.reportsPersistence.subPath | default "" | quote }}
             {{- end }}
-            - name: optunit
-              mountPath: /opt/unit
-            - name: secrets
-              mountPath: /run/secrets/superuser_password
-              subPath: superuser_password
-              readOnly: true
-            - name: secrets
-              mountPath: /run/secrets/superuser_api_token
-              subPath: superuser_api_token
-              readOnly: true
-            {{- with .Values.deploymentConfig.containers.extraVolumeMounts }}
+            {{- with .Values.worker.containers.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if .Values.deploymentConfig.containers.resources }}
+          {{- if .Values.worker.containers.resources }}
           resources:
-            {{- toYaml .Values.deploymentConfig.containers.resources | nindent 12 }}
+            {{- toYaml .Values.worker.containers.resources | nindent 12 }}
           {{- end }}
-        {{- with .Values.deploymentConfig.containers.extraContainers }}
+        {{- with .Values.worker.containers.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       volumes:
@@ -159,11 +113,6 @@ spec:
               - secret:
                   name: {{ .Values.existingSecret | default (include "netbox.fullname" .) | quote }}
                   items:
-                    # Used by netbox-docker entry scripts
-                    - key: superuser_password
-                      path: superuser_password
-                    - key: superuser_api_token
-                      path: superuser_api_token
                     # Used by our configuration
                     - key: email_password
                       path: email_password
@@ -194,9 +143,6 @@ spec:
         - name: netbox-tmp
           emptyDir:
             medium: Memory
-        - name: optunit
-          emptyDir:
-            medium: Memory
         - name: media
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
@@ -209,26 +155,23 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.reportsPersistence.existingClaim | default (printf "%s-reports" (include "netbox.fullname" .)) }}
         {{- end }}
-        {{- with .Values.deploymentConfig.extraVolumes }}
+        {{- with .Values.worker.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.deploymentConfig.nodeSelector }}
+      {{- with .Values.worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.deploymentConfig.affinity }}
+      {{- with .Values.worker.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.deploymentConfig.tolerations }}
+      {{- with .Values.worker.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.deploymentConfig.hostAliases }}
+      {{- with .Values.worker.hostAliases }}
       hostAliases:
         {{- toYaml . | indent 8 }}
       {{- end }}
-      {{- with .Values.deploymentConfig.topologySpreadConstraints }}
-      topologySpreadConstraints:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+{{- end }}
