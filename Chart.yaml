@@ -1,7 +1,7 @@
 apiVersion: v2
 name: netbox
-version: 0.0.2
-appVersion: v3.4.4
+version: 0.1.0
+appVersion: v3.4.10
 description: IP address management (IPAM) and data center infrastructure management (DCIM) tool
 home: https://github.com/Kyramee/netbox-openshift
 icon: https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.png
