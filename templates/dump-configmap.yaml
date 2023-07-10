@@ -1,0 +1,15 @@
+{{- if .Values.useMigration and .Values.useBundlePostgresql }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netbox-dump
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+{{ include "netbox.labels" . | indent 4 }}
+data:
+  dump: |
+    {{ .Files.Get "files/" + .Values.migration.filename | quote }}
+{{- end }}

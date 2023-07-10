@@ -17,6 +17,13 @@ fullnameOverride: ""
 ## Set to true to use a bundled postgresql database
 useBundlePostgresql: true
 
+## Set to true to initialize the bundle postgresql database from a pg_dump file
+# When using migration the values files values-migration.yaml and the "Netbox 
+# migration" section bellow must be correctly configured and inclued when 
+# installing netbox.
+# Ex: helm install netbox -f values.yaml -f values-migration.yaml ./netbox-chart
+useMigration: true
+
 ## Set one only one to true to chose between using bundled, external or
 # sentinel redis
 useBundleRedis: true
@@ -104,7 +111,7 @@ allowedHosts:
   - '*'
 
 ## Bundle database settings
-# These options overwrite the default values in the bundle postgresql chart
+# These options override the default values in the bundle postgresql chart
 # values.yaml file. See the bitnami values.yaml file here:
 # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
 postgresql:
@@ -141,7 +148,7 @@ externalDatabase:
 
 
 ## Bundle redis settings
-# These options overwrite the default values in the bundle redis chart
+# These options override the default values in the bundle redis chart
 # values.yaml file. See the bitnami values.yaml file here:
 # https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
 redis:
@@ -798,6 +805,17 @@ deployment:
   #      matchLabels:
   #        "app.kubernetes.io/component": netbox
   #        "app.kubernetes.io/name": netbox
+
+
+###########################################################################
+#
+# Netbox migration
+#
+###########################################################################
+
+migration:
+  # The file must be put in the "files" folder
+  filename: netbox-dump.sql
 
 
 ###########################################################################

@@ -1,0 +1,29 @@
+###########################################################################
+#
+# READ THE COMMENT BEFORE CHANGING ANY VALUES 
+#
+###########################################################################
+
+## Overriding the default values
+# These options override the default values in the bundle postgresql chart
+# values.yaml file. See the bitnami values.yaml file here:
+# https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
+postgresql:
+  primary:
+    # The database name must match the one set in the file values.yaml under
+    # postgresql.auth.database and the filename and path must match the
+    # extraVolumeMounts mountPath
+    # command:
+    #   - pg_restore -d netbox --clean --create /etc/netbox/netbox-dump.sql
+
+    extraVolumeMounts:
+      - name: dump # Must match the extraVolume name
+        mountPath: /etc/netbox/netbox-dump.sql  # Must match the file in the command
+        subPath: dump # Must match the data key in the template dump-configmap.yaml
+        readOnly: true 
+      
+    extraVolumes:
+      - name: dump # Must match the extraVolumeMounts name
+        configMap:
+          name: netbox-dump # Must match the configmap name in the template dump-configmap.yaml
+          defaultMode: 0440
