@@ -314,13 +314,13 @@ The following table lists the configurable parameters for this chart and their d
 | `persistence.selector`                          | Set the selector for PVs, if desired                                | `{}`                                         |
 | `persistence.accessMode`                        | Access mode for the volume                                          | `ReadWriteOnce`                              |
 | `persistence.size`                              | Size of persistent volume to request                                | `1Gi`                                        |
-| `reportsPersistence.enabled`                    | Enable storage persistence for NetBox reports                       | `false`                                      |
-| `reportsPersistence.existingClaim`              | Use an existing `PersistentVolumeClaim` instead of creating one     | `""`                                         |
-| `reportsPersistence.subPath`                    | Mount a sub-path of the volume into the container, not the root     | `""`                                         |
-| `reportsPersistence.storageClass`               | Set the storage class of the PVC (use `-` to disable provisioning)  | `""`                                         |
-| `reportsPersistence.selector`                   | Set the selector for PVs, if desired                                | `{}`                                         |
-| `reportsPersistence.accessMode`                 | Access mode for the volume                                          | `ReadWriteOnce`                              |
-| `reportsPersistence.size`                       | Size of persistent volume to request                                | `1Gi`                                        |
+| `persistence.reports.enabled`                    | Enable storage persistence for NetBox reports                       | `false`                                      |
+| `persistence.reports.existingClaim`              | Use an existing `PersistentVolumeClaim` instead of creating one     | `""`                                         |
+| `persistence.reports.subPath`                    | Mount a sub-path of the volume into the container, not the root     | `""`                                         |
+| `persistence.reports.storageClass`               | Set the storage class of the PVC (use `-` to disable provisioning)  | `""`                                         |
+| `persistence.reports.selector`                   | Set the selector for PVs, if desired                                | `{}`                                         |
+| `persistence.reports.accessMode`                 | Access mode for the volume                                          | `ReadWriteOnce`                              |
+| `persistence.reports.size`                       | Size of persistent volume to request                                | `1Gi`                                        |
 | `podAnnotations`                                | Additional annotations for NetBox pods                              | `{}`                                         |
 | `podLabels`                                     | Additional labels for NetBox pods                                   | `{}`                                         |
 | `podSecurityContext`                            | Security context for NetBox pods                                    | *see `values.yaml`*                          |

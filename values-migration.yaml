@@ -16,14 +16,45 @@ postgresql:
     # command:
     #   - pg_restore -d netbox --clean --create /etc/netbox/netbox-dump.sql
 
+    podAnnotations:
+      - alpha.image.policy.openshift.io/resolve-names: '*'
+
+    initContainers:
+      - name: fetch-dump
+        image: netbox-migration-imagestream
+        imagePullPolicy: Always
+        command:
+          - "bin/sh"
+          - "-c"
+          - "/ssh/configmap/entrypoint.sh"
+        volumeMounts:
+          - name: migration-secret
+            mountPath: "/migration/secret/"
+          - name: migration-configmap
+            mountPath: "/migration/configmap/"
+          - name: migration-dump
+            mountPath: "/migration/dump/"
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "500m"
+
     extraVolumeMounts:
-      - name: dump # Must match the extraVolume name
-        mountPath: /etc/netbox/netbox-dump.sql  # Must match the file in the command
-        subPath: dump # Must match the data key in the template dump-configmap.yaml
-        readOnly: true 
-      
+      - name: migration-dump
+        mountPath: "/migration/netbox/"
+
     extraVolumes:
-      - name: dump # Must match the extraVolumeMounts name
+      - name: migration-secret
+        secret:
+          secretName: netbox-migration-secret
+          defaultMode: 0600
+      - name: migration-configmap
         configMap:
-          name: netbox-dump # Must match the configmap name in the template dump-configmap.yaml
-          defaultMode: 0440
+          name: netbox-migration-configmap
+          defaultMode: 0710
+      - name: migration-dump
+        persistentVolumeClaim:
+          claimName: netbox-migration-pvc
+          defaultMode: 0644
+
+    

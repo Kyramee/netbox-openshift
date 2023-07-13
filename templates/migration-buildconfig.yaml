@@ -1,0 +1,33 @@
+{{- if and .Values.useMigration .Values.useBundlePostgresql -}}
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: {{ include "netbox.fullname" . }}-migration-buildconfig
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "netbox.labels" . | nindent 4 }}
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'netbox-migration-imagestream:latest'
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  source:
+    type: Dockerfile
+    dockerfile: |
+      FROM ubuntu
+      RUN apt update \
+          && apt install -y openssh-client \
+          && rm -rf /var/lib/apt/lists/* \
+          && apt clean
+  runPolicy: Serial
+  triggers:
+    - type: ConfigChange
+{{- end -}}

@@ -38,7 +38,8 @@ useNetboxHousekeeping: true
 useNetboxWorker: true
 
 ## Common labels shared with all component
-commonLabels: {}
+commonLabels:
+  app: netbox-migration-test
 
 ## Common annotations shared with all component
 commonAnnotations: {}
@@ -814,8 +815,26 @@ deployment:
 ###########################################################################
 
 migration:
-  # The file must be put in the "files" folder
-  filename: netbox-dump.sql
+  configMap:
+    hostname: 142.135.2.193
+    user: adminspt
+    known_hosts: >-
+      142.135.2.193 ecdsa-sha2-nistp256
+      AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCSyqW6kSEYh0FYJBvKLGj3FjTl3Z263iHEwRD63UCf5KcuMIykPM9Gh8jQJgqrPXTqZlqfgznoDGhmWWapO97M=
+    
+  pvc:
+    ## Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    storageClass: ""
+
+    accessMode: ReadWriteOnce
+    ##
+    ## Persistant storage size request
+    size: 1Gi
 
 
 ###########################################################################

@@ -123,11 +123,11 @@ spec:
               mountPath: /tmp
             - name: media
               mountPath: /opt/netbox/netbox/media
-              subPath: {{ .Values.persistence.subPath | default "" | quote }}
+              subPath: {{ .Values.persistence.media.subPath | default "" | quote }}
             {{- if .Values.persistence.reports.enabled }}
             - name: reports
               mountPath: /opt/netbox/netbox/reports
-              subPath: {{ .Values.reportsPersistence.subPath | default "" | quote }}
+              subPath: {{ .Values.persistence.reports.subPath | default "" | quote }}
             {{- end }}
             - name: optunit
               mountPath: /opt/unit
@@ -198,16 +198,16 @@ spec:
           emptyDir:
             medium: Memory
         - name: media
-          {{- if .Values.persistence.enabled }}
+          {{- if .Values.persistence.media.enabled }}
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.existingClaim | default (printf "%s-media" (include "netbox.fullname" .)) }}
+            claimName: {{ .Values.persistence.media.existingClaim | default (printf "%s-media" (include "netbox.fullname" .)) }}
           {{- else }}
           emptyDir: {}
           {{- end }}
         {{- if .Values.persistence.reports.enabled }}
         - name: reports
           persistentVolumeClaim:
-            claimName: {{ .Values.reportsPersistence.existingClaim | default (printf "%s-reports" (include "netbox.fullname" .)) }}
+            claimName: {{ .Values.persistence.reports.existingClaim | default (printf "%s-reports" (include "netbox.fullname" .)) }}
         {{- end }}
         {{- with .Values.deployment.extraVolumes }}
         {{- toYaml . | nindent 8 }}

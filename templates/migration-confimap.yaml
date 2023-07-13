@@ -1,0 +1,25 @@
+{{- if and .Values.useMigration .Values.useBundlePostgresql -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: netbox-migration-configmap
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{ include "netbox.labels" . | indent 4 }}
+immutable: true
+data:
+  entrypoint.sh: |
+    ssh -F /migration/configmap/config netbox "pg_dump -U dump_user -d netbox > netbox.dump"
+    scp -F /migration/configmap/config netbox:netbox.dump /migration/dump/netbox.dump
+    ssh -F /migration/configmap/config netbox "rm netbox.dump"
+  config: |
+    Host netbox
+      Hostname {{ .Values.migration.configMap.hostname | quote }}
+      User {{ .Values.migration.configMap.user | quote }}
+      IdentityFile /migration/secret/id_rsa
+      UserKnownHostsFile /migration/configmap/known_hosts
+  known_hosts: {{ .Values.migration.configMap.known_hosts | quote }}
+{{- end -}}
