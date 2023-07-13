@@ -124,13 +124,23 @@ postgresql:
   primary:
     podSecurityContext:
       fsGroup:
+      seccompProfile:
+        type: RuntimeDefault
     containerSecurityContext:
       runAsUser:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
   readReplicas:
     podSecurityContext:
       fsGroup:
+      seccompProfile:
+        type: RuntimeDefault
     containerSecurityContext:
       runAsUser:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
 
 ## External database settings
 # These are used if useBundlePostgresql is false, and are ignored otherwise
@@ -158,13 +168,23 @@ redis:
   master:
     podSecurityContext:
       fsGroup:
+      seccompProfile:
+        type: RuntimeDefault
     containerSecurityContext:
       runAsUser:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
   replica:
     podSecurityContext:
       fsGroup:
+      seccompProfile:
+        type: RuntimeDefault
     containerSecurityContext:
       runAsUser:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
 
 ## Bundle redis settings
 # These are used if useBundleRedis is true, and are ignored otherwise
@@ -657,6 +677,8 @@ housekeeping:
   podSecurityContext:
     fsGroup:
     runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   
   extraInitContainers: []
 
@@ -669,6 +691,9 @@ housekeeping:
       runAsNonRoot: true
       runAsUser:
       runAsGroup:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
 
     ## Additional environment variables to set
     extraEnvs: []
@@ -723,6 +748,8 @@ deployment:
   podSecurityContext:
     fsGroup:
     runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
 
   initContainers:
     image:
@@ -740,6 +767,9 @@ deployment:
       runAsNonRoot: true
       runAsUser:
       runAsGroup:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
 
     extraInitContainers: []
 
@@ -752,6 +782,9 @@ deployment:
       runAsNonRoot: true
       runAsUser:
       runAsGroup:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
 
     # Skip the netbox-docker startup scripts which can pre-populate objects into a
     # fresh NetBox installation. By default these do nothing, but they take a while
@@ -1013,6 +1046,8 @@ worker:
   podSecurityContext:
     fsGroup:
     runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
 
   extraInitContainers: []
 
@@ -1025,6 +1060,9 @@ worker:
       runAsNonRoot: true
       runAsUser:
       runAsGroup:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
 
     extraEnvs: []
 
