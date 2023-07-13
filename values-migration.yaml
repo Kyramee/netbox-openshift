@@ -17,7 +17,7 @@ postgresql:
     #   - pg_restore -d netbox --clean --create /etc/netbox/netbox-dump.sql
 
     podAnnotations:
-      - alpha.image.policy.openshift.io/resolve-names: '*'
+      alpha.image.policy.openshift.io/resolve-names: '*'
 
     initContainers:
       - name: fetch-dump

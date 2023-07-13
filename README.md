@@ -301,7 +301,7 @@ The following table lists the configurable parameters for this chart and their d
 | `cachingRedis.password`                         | Password for external Redis (see also `existingSecret`)             | `""`                                         |
 | `cachingRedis.existingSecretName`               | Fetch password for external Redis from a different `Secret`         | `""`                                         |
 | `cachingRedis.existingSecretKey`                | Key to fetch the password in the above `Secret`                     | `redis-password`                             |
-| `image.imagePullSecrets`                              | List of `Secret` names containing private registry credentials      | `[]`                                         |
+| `imagePullSecrets`                              | List of `Secret` names containing private registry credentials      | `[]`                                         |
 | `nameOverride`                                  | Override the application name (`netbox`) used throughout the chart  | `""`                                         |
 | `fullnameOverride`                              | Override the full name of resources created as part of the release  | `""`                                         |
 | `serviceAccount.create`                         | Create a ServiceAccount for NetBox                                  | `true`                                       |
