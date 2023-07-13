@@ -42,7 +42,7 @@ postgresql:
 
     extraVolumeMounts:
       - name: migration-dump
-        mountPath: "/migration/netbox/"
+        mountPath: "/migration/dump/"
 
     extraVolumes:
       - name: migration-secret
