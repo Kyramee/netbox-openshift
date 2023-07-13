@@ -5,6 +5,7 @@ metadata:
   name: netbox-migration-imagestream
   {{- with .Values.commonAnnotations }}
   annotations:
+    openshift.io/display-name: netbox-migration-imagestream
     {{- toYaml . | nindent 4 }}
   {{- end }}
   labels:
