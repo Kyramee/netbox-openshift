@@ -21,7 +21,7 @@ postgresql:
 
     initContainers:
       - name: fetch-dump
-        image: netbox-migration-imagestream
+        image: image-registry.openshift-image-registry.svc:5000/test-docker-ssh/netbox-migration-imagestream
         imagePullPolicy: Always
         command:
           - "bin/sh"
