@@ -26,7 +26,7 @@ postgresql:
         command:
           - "bin/sh"
           - "-c"
-          - "/ssh/configmap/entrypoint.sh"
+          - "/migration/configmap/entrypoint.sh"
         volumeMounts:
           - name: migration-secret
             mountPath: "/migration/secret/"
