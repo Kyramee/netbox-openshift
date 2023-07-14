@@ -1,6 +1,8 @@
 ###########################################################################
 #
-# READ THE COMMENT BEFORE CHANGING ANY VALUES 
+# This configuration is associated to the netbox-migration chart. Before
+# making any change, verify the impact of the change on the compatibility 
+# between this file and the netbox-migration chart.
 #
 ###########################################################################
 
@@ -10,69 +12,23 @@
 # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
 postgresql:
   primary:
-    # The database name must match the one set in the file values.yaml under
-    # postgresql.auth.database and the filename and path must match the
-    # extraVolumeMounts mountPath
-    # command:
-    #   - 'bin/sh'
-    #   - '-c'
-    #   - '-e'
-    #   - 'exec /migration/dump/restore.sh'
-
     initdb:
       scripts:
+        # This script will populate the freshly created database with the data
+        # dump from the old one.
         00_init_extensions.sh: |
           export PGPASSWORD=$POSTGRES_POSTGRES_PASSWORD
-          psql -U postgres netbox -c 'CREATE ROLE dump_user WITH NOLOGIN'
-          psql -U postgres netbox < /migration/dump/netbox.sql
-
-    podAnnotations:
-      alpha.image.policy.openshift.io/resolve-names: '*'
-
-    initContainers:
-      - name: fetch-dump
-        image: image-registry.openshift-image-registry.svc:5000/test2/netbox-migration-imagestream:latest
-        imagePullPolicy: Always
-        command:
-          - 'bin/sh'
-          - '-c'
-          - '/migration/configmap/entrypoint.sh'
-
-        volumeMounts:
-          - name: migration-secret
-            mountPath: "/migration/secret/"
-          - name: migration-configmap
-            mountPath: "/migration/configmap/"
-          - name: migration-dump
-            mountPath: "/migration/dump/"
-        resources:
-          limits:
-            memory: "500Mi"
-            cpu: "500m"
+          psql -U postgres netbox < /migration/data/netbox.sql
 
     extraVolumeMounts:
-      - name: migration-dump
-        mountPath: "/migration/dump/"
+      # Mount the volume containing the migration data
+      - name: migration-data
+        mountPath: "/migration/data/"
 
     extraVolumes:
-      - name: migration-secret
-        secret:
-          secretName: netbox-migration-secret
-          defaultMode: 0600
-      - name: migration-configmap
-        configMap:
-          name: netbox-migration-configmap
-          defaultMode: 0710
-      - name: migration-dump
+      # Select the pvc containing the migration data
+      - name: migration-data
         persistentVolumeClaim:
-          claimName: netbox-migration-pvc
+          # The claimName must match the pvc name in the netbox-migration chart
+          claimName: netbox-migration
           defaultMode: 0644
-
-    # pgHbaConfiguration: |-
-    #   local all all  trust
-    #   host all all 0.0.0.0/0 md5
-    #   host all all ::/0 md5
-    #   host all all 127.0.0.1/32 md5
-    #   host all all ::1/128  md5
-
-    

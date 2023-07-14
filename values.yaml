@@ -17,13 +17,6 @@ fullnameOverride: ""
 ## Set to true to use a bundled postgresql database
 useBundlePostgresql: true
 
-## Set to true to initialize the bundle postgresql database from a pg_dump file
-# When using migration the values files values-migration.yaml and the "Netbox 
-# migration" section bellow must be correctly configured and inclued when 
-# installing netbox.
-# Ex: helm install netbox -f values.yaml -f values-migration.yaml ./netbox-chart
-useMigration: true
-
 ## Set one only one to true to chose between using bundled, external or
 # sentinel redis
 useBundleRedis: true
