@@ -12,9 +12,9 @@ metadata:
 immutable: true
 data:
   entrypoint.sh: |
-    ssh -F /migration/configmap/config netbox "pg_dump -U dump_user -d netbox > netbox.sql"
-    scp -F /migration/configmap/config netbox:netbox.sql /migration/dump/netbox.sql
-    ssh -F /migration/configmap/config netbox "rm netbox.sql"
+    ssh -F /migration/configmap/config netbox "pg_dump -Fc -U dump_user -d netbox > netbox.dump"
+    scp -F /migration/configmap/config netbox:netbox.dump /migration/dump/netbox.dump
+    ssh -F /migration/configmap/config netbox "rm netbox.dump"
     cp /migration/configmap/restore.sh /migration/dump/restore.sh
   config: |
     Host netbox
@@ -24,7 +24,7 @@ data:
       UserKnownHostsFile /migration/configmap/known_hosts
   known_hosts: {{ .Values.migration.configMap.known_hosts | quote }}
   restore.sh: |
-    pg_restore -U postgres --create --dbname=netbox2 /migration/dump/netbox.sql
+    pg_restore -U postgres --create --dbname=netbox2 /migration/dump/netbox.dump
     /opt/bitnami/scripts/postgresql/entrypoint.sh /opt/bitnami/scripts/postgresql/run.sh  
 
 {{- end -}}
