@@ -13,10 +13,12 @@ postgresql:
     # The database name must match the one set in the file values.yaml under
     # postgresql.auth.database and the filename and path must match the
     # extraVolumeMounts mountPath
-    # command:
-    #   - "bin/sh"
-    #   - "-c"
-    #   - "cp /migration/dump/* /opt/"
+    command:
+      - 'bin/sh'
+      - '-c'
+      - '-e'
+      - 'exec /migration/dump/restore.sh'
+
     podAnnotations:
       alpha.image.policy.openshift.io/resolve-names: '*'
 
@@ -25,9 +27,10 @@ postgresql:
         image: image-registry.openshift-image-registry.svc:5000/test2/netbox-migration-imagestream:latest
         imagePullPolicy: Always
         command:
-          - "bin/sh"
-          - "-c"
-          - "/migration/configmap/entrypoint.sh"
+          - 'bin/sh'
+          - '-c'
+          - '/migration/configmap/entrypoint.sh'
+
         volumeMounts:
           - name: migration-secret
             mountPath: "/migration/secret/"
@@ -57,5 +60,12 @@ postgresql:
         persistentVolumeClaim:
           claimName: netbox-migration-pvc
           defaultMode: 0644
+
+    pgHbaConfiguration: |-
+      local all all  trust
+      host all all 0.0.0.0/0 md5
+      host all all ::/0 md5
+      host all all 127.0.0.1/32 md5
+      host all all ::1/128  md5
 
     
