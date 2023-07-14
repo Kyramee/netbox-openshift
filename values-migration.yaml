@@ -13,11 +13,11 @@ postgresql:
     # The database name must match the one set in the file values.yaml under
     # postgresql.auth.database and the filename and path must match the
     # extraVolumeMounts mountPath
-    # command:
-    #   - 'bin/sh'
-    #   - '-c'
-    #   - '-e'
-    #   - 'exec /migration/dump/restore.sh'
+    command:
+      - 'bin/sh'
+      - '-c'
+      - '-e'
+      - 'exec /migration/dump/restore.sh'
 
     podAnnotations:
       alpha.image.policy.openshift.io/resolve-names: '*'

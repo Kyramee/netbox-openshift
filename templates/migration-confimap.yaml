@@ -24,8 +24,7 @@ data:
       UserKnownHostsFile /migration/configmap/known_hosts
   known_hosts: {{ .Values.migration.configMap.known_hosts | quote }}
   restore.sh: |
-    pg_restore -U postgres --create --dbname=netbox2 /migration/dump/netbox.sql
-    /opt/bitnami/scripts/postgresql/entrypoint.sh
-#    /opt/bitnami/scripts/postgresql/run.sh
+#    pg_restore -U postgres --create --dbname=netbox2 /migration/dump/netbox.sql
+    /opt/bitnami/scripts/postgresql/entrypoint.sh /opt/bitnami/scripts/postgresql/run.sh  
 
 {{- end -}}
