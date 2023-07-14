@@ -13,8 +13,8 @@ immutable: true
 data:
   entrypoint.sh: |
     ssh -F /migration/configmap/config netbox "pg_dump -U dump_user -d netbox > netbox.sql"
-    scp -F /migration/configmap/config netbox:netbox.dump /migration/dump/netbox.sql
-    ssh -F /migration/configmap/config netbox "rm netbox.dump"
+    scp -F /migration/configmap/config netbox:netbox.sql /migration/dump/netbox.sql
+    ssh -F /migration/configmap/config netbox "rm netbox.sql"
     cp /migration/configmap/restore.sh /migration/dump/restore.sh
   config: |
     Host netbox
