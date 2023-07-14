@@ -13,11 +13,18 @@ postgresql:
     # The database name must match the one set in the file values.yaml under
     # postgresql.auth.database and the filename and path must match the
     # extraVolumeMounts mountPath
-    command:
-      - 'bin/sh'
-      - '-c'
-      - '-e'
-      - 'exec /migration/dump/restore.sh'
+    # command:
+    #   - 'bin/sh'
+    #   - '-c'
+    #   - '-e'
+    #   - 'exec /migration/dump/restore.sh'
+
+    initdb:
+      scripts:
+        00_init_extensions.sh: |
+          export PGPASSWORD=$POSTGRES_POSTGRES_PASSWORD
+          psql -U postgres netbox -c 'CREATE ROLE dump_user WITH NOLOGIN'
+          psql -U postgres netbox < /migration/dump/netbox.sql
 
     podAnnotations:
       alpha.image.policy.openshift.io/resolve-names: '*'
@@ -61,11 +68,11 @@ postgresql:
           claimName: netbox-migration-pvc
           defaultMode: 0644
 
-    pgHbaConfiguration: |-
-      local all all  trust
-      host all all 0.0.0.0/0 md5
-      host all all ::/0 md5
-      host all all 127.0.0.1/32 md5
-      host all all ::1/128  md5
+    # pgHbaConfiguration: |-
+    #   local all all  trust
+    #   host all all 0.0.0.0/0 md5
+    #   host all all ::/0 md5
+    #   host all all 127.0.0.1/32 md5
+    #   host all all ::1/128  md5
 
     
