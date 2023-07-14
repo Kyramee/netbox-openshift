@@ -26,6 +26,6 @@ data:
   restore.sh: |
     pg_restore -U postgres --create --dbname=netbox2 /migration/dump/netbox.sql
     /opt/bitnami/scripts/postgresql/entrypoint.sh
-    /opt/bitnami/scripts/postgresql/run.sh
+#    /opt/bitnami/scripts/postgresql/run.sh
 
 {{- end -}}
