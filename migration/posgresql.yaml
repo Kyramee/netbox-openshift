@@ -31,4 +31,3 @@ postgresql:
         persistentVolumeClaim:
           # The claimName must match the pvc name in the netbox-migration chart
           claimName: netbox-migration
-          defaultMode: 0644
