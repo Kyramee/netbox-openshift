@@ -23,7 +23,7 @@ spec:
           command:
             - 'bin/sh'
             - '-c'
-            - {{ printf "%s%s" "/migration/configmap/" .Values.script | squote }}
+            - {{ printf "%s%s" "/migration/configmap/" .Values.job.script | squote }}
           volumeMounts:
             - name: "migration-data"
               mountPath: "/migration/data/"
