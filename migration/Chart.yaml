@@ -1,0 +1,10 @@
+apiVersion: v2
+name: netbox-migration
+version: 0.0.1
+description: Download a the netbox dump to persistent volume with ssh
+home: https://github.com/Kyramee/netbox-migration-chart
+icon: https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.png
+maintainers:
+- name: Adrien Côté-Laferrière
+  email: adrienthereader@gmail.com
+  url: https://github.com/Kyramee

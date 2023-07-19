@@ -1,0 +1,20 @@
+kind: "PersistentVolumeClaim"
+apiVersion: "v1"
+metadata:
+  name: "netbox-migration"
+  labels:
+    app: {{ printf "%s-%s" .Release.Namespace "netbox-migration" | quote }}
+    housekeeping: {{ include "migration.housekeeping" . | quote }}
+spec:
+  accessModes:
+    - {{ .Values.pvc.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.pvc.size | quote }}
+{{- if .Values.pvc.storageClass }}
+  {{- if (eq "-" .Values.pvc.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.pvc.storageClass | quote }}
+  {{- end }}
+{{- end }}

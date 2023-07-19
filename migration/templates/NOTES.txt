@@ -1,0 +1,3 @@
+Housekeeping command to run after netbox is fully operationnal:
+oc delete job,pvc,serviceaccount,rolebinding -A -l housekeeping={{ include "migration.housekeeping" . }}
+helm uninstall {{ .Release.Name }}

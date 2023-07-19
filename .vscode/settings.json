@@ -1,0 +1,10 @@
+{
+    "yaml.schemas": {
+        "https://json.schemastore.org/chart.json": [
+            "file:///c%3A/Users/CoteA9/OneDrive%20-%20SSC-SPC/Documents/netbox-openshift-chart/netbox-chart/templates/configmap.yaml",
+            "file:///c%3A/Users/CoteA9/OneDrive%20-%20SSC-SPC/Documents/netbox-openshift-chart/netbox-chart/templates/secret.yaml"
+        ],
+        "https://json.schemastore.org/helmfile.json": "file:///c%3A/Users/CoteA9/OneDrive%20-%20SSC-SPC/Documents/netbox-openshift-chart/netbox-chart/templates/cronjob.yaml",
+        "https://json.schemastore.org/yamllint.json": "file:///c%3A/Users/CoteA9/OneDrive%20-%20SSC-SPC/Documents/netbox-openshift-chart/netbox-chart/values.yaml"
+    }
+}

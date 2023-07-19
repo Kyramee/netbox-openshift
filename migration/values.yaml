@@ -1,0 +1,18 @@
+configMap:
+  # SSH hostname
+  hostname: 142.135.2.193
+  # SSH user
+  user: adminspt
+  # SSH known_hosts entry of the target
+  known_hosts: >-
+    142.135.2.193 ecdsa-sha2-nistp256
+    AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCSyqW6kSEYh0FYJBvKLGj3FjTl3Z263iHEwRD63UCf5KcuMIykPM9Gh8jQJgqrPXTqZlqfgznoDGhmWWapO97M=
+  
+pvc:
+  # Leave empty to use the default storage class
+  storageClass: ""
+
+  accessMode: ReadWriteOnce
+  
+  # Size of the storage needed to hold the database dump
+  size: 1Gi
