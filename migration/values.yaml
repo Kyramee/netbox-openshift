@@ -1,3 +1,6 @@
+job:
+  script: entrypoint.sh
+
 configMap:
   # SSH hostname
   hostname: 142.135.2.193
