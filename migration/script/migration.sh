@@ -29,7 +29,7 @@ print_usage() {
 }
 
 POSITIONAL_ARGS=()
-local redis_password=""
+redis_password=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
