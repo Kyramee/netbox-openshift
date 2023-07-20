@@ -15,7 +15,7 @@ echo "Starting migration..."
 echo "$(date) Migration error:" >> "$CHART_PATH/error.log"
 
 helm install -f "$CHART_PATH/migration/values.yaml" migration "$CHART_PATH/migration/" -o json --wait --wait-for-jobs > "$CHART_PATH/migration_output.json" 2>> "$CHART_PATH/error.log"
-STATUS=jq '.info.status' <  "$CHART_PATH/migration_output.json"
+STATUS="$(jq '.info.status' <  "$CHART_PATH/migration_output.json)"
 if [[ $STATUS = "deployed" ]] ; then
   echo "Migration failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
@@ -31,7 +31,7 @@ echo "Starting Netbox install..."
 echo "$(date) Netbox install error:" >> "$CHART_PATH/error.log"
 
 helm install -f netbox/values.yaml -f migration/posgresql.yaml netbox ./netbox/ -o json --wait >  "$CHART_PATH/install_output.json" 2>> "$CHART_PATH/error.log"
-STATUS=jq '.info.status' <  "$CHART_PATH/install_output.json"
+STATUS="$(jq '.info.status' <  "$CHART_PATH/install_output.json")"
 if [[ $STATUS = "deployed" ]] ; then
   echo "Netbox install failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
@@ -44,7 +44,7 @@ echo "Starting housekeeping..."
 echo "$(date) Housekeeping error:" >> "$CHART_PATH/error.log"
 
 helm upgrade -f netbox/values.yaml netbox ./netbox/ -o json --wait >  "$CHART_PATH/upgrade_output.json" 2>> "$CHART_PATH/error.log"
-STATUS=jq '.info.status' <  "$CHART_PATH/upgrade_output.json"
+STATUS="$(jq '.info.status' <  "$CHART_PATH/upgrade_output.json")"
 if [[ $STATUS = "deployed" ]] ; then
   echo "Starting failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
