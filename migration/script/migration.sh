@@ -15,7 +15,7 @@ echo "Starting migration..."
 echo "$(date) Migration error:" >> "$CHART_PATH/error.log"
 
 helm install -f "$CHART_PATH/migration/values.yaml" migration "$CHART_PATH/migration/" -o json --wait --wait-for-jobs > "$CHART_PATH/migration_output.json" 2>> "$CHART_PATH/error.log"
-STATUS="$(jq '.info.status' <  "$CHART_PATH/migration_output.json)"
+STATUS="$(jq '.info.status' <  "$CHART_PATH/migration_output.json")"
 if [[ $STATUS = "deployed" ]] ; then
   echo "Migration failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
