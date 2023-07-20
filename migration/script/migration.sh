@@ -1,31 +1,14 @@
 #!/bin/bash
 print_usage() {
-  local options=(
-      '-r,--redisPassword [redisPassword]'
-      '-h,--help'
-  )
-
-  local commandDescriptions=(
-    "This script execute the following:"
-    "1. Retrieve a netbox database backup using the netbox-migration image stored in a OpenShift project of the same name"
-    "2. Install an instance of netbox with the retrived backu[] on OpenShift using helm"
-    "3. Do some housekeeping by removing all resources needed for the migration that are not needed by netbox"
-  )
-
-  local usage_message="Usage: $(basename "$0") [netboxPassword] [postgresPassword] [OPTION]..."
-
-  echo $usage_message
+  echo "Usage: $(basename "$0") [netboxPassword] [postgresPassword] [OPTION]..."
   echo "Options:"
-
-  for (( i = 0; i < ${#commandDoptionsescriptions[@]}; i++)); do
-    printf -- '\t%s\n' ${options[$i]}
-  done
-
+  echo " -r,--redisPassword [redisPassword]"
+  echo " -h,--help"
   echo ""
-
-  for (( i = 0; i < ${#commandDescriptions[@]}; i++)); do
-    printf -- '%s\n' ${commandDescriptions[$i]}
-  done
+  echo "This script execute the following:"
+  echo "1. Retrieve a netbox database backup using the netbox-migration image stored in a OpenShift project of the same name"
+  echo "2. Install an instance of netbox with the retrived backu[] on OpenShift using helm"
+  echo "3. Do some housekeeping by removing all resources needed for the migration that are not needed by netbox"
 }
 
 POSITIONAL_ARGS=()
