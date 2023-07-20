@@ -14,14 +14,14 @@ echo "Starting migration..."
 
 echo "$(date) Migration error:" >> "$CHART_PATH/error.log"
 
-helm install -f "$CHART_PATH/migration/values.yaml" migration "$CHART_PATH/migration/" -o json --wait --wait-for-jobs > "$CHART_PATH/output.json" 2>> "$CHART_PATH/error.log"
-STATUS=jq '.info.status' <  "$CHART_PATH/output.json"
+helm install -f "$CHART_PATH/migration/values.yaml" migration "$CHART_PATH/migration/" -o json --wait --wait-for-jobs > "$CHART_PATH/migration_output.json" 2>> "$CHART_PATH/error.log"
+STATUS=jq '.info.status' <  "$CHART_PATH/migration_output.json"
 if [[ $STATUS = "deployed" ]] ; then
   echo "Migration failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
 fi
 
-jq -r '.info.notes' <  "$CHART_PATH/output.json" > "$CHART_PATH/cleanup.sh"
+jq -r '.info.notes' <  "$CHART_PATH/migration_output.json" > "$CHART_PATH/cleanup.sh"
 chmod 770 "$CHART_PATH/cleanup.sh"
 
 echo "Migration successful..."
@@ -30,8 +30,8 @@ echo "Starting Netbox install..."
 
 echo "$(date) Netbox install error:" >> "$CHART_PATH/error.log"
 
-helm install -f netbox/values.yaml -f migration/posgresql.yaml netbox ./netbox/ -o json --wait >  "$CHART_PATH/output.json" 2>> "$CHART_PATH/error.log"
-STATUS=jq '.info.status' <  "$CHART_PATH/output.json"
+helm install -f netbox/values.yaml -f migration/posgresql.yaml netbox ./netbox/ -o json --wait >  "$CHART_PATH/install_output.json" 2>> "$CHART_PATH/error.log"
+STATUS=jq '.info.status' <  "$CHART_PATH/install_output.json"
 if [[ $STATUS = "deployed" ]] ; then
   echo "Netbox install failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
@@ -43,8 +43,8 @@ echo "Starting housekeeping..."
 
 echo "$(date) Housekeeping error:" >> "$CHART_PATH/error.log"
 
-helm upgrade -f netbox/values.yaml netbox ./netbox/ -o json --wait >  "$CHART_PATH/output.json" 2>> "$CHART_PATH/error.log"
-STATUS=jq '.info.status' <  "$CHART_PATH/output.json"
+helm upgrade -f netbox/values.yaml netbox ./netbox/ -o json --wait >  "$CHART_PATH/upgrade_output.json" 2>> "$CHART_PATH/error.log"
+STATUS=jq '.info.status' <  "$CHART_PATH/upgrade_output.json"
 if [[ $STATUS = "deployed" ]] ; then
   echo "Starting failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
@@ -56,7 +56,7 @@ if [[ $? -eq 0 ]] ; then
   exit 1  # fail
 fi
 
-rm "$CHART_PATH/output.json"
+rm "$CHART_PATH/*.json"
 rm "$CHART_PATH/cleanup.sh"
 
 echo "Housekeeping successful..."
