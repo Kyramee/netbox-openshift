@@ -14,15 +14,15 @@ echo "Starting migration..."
 
 echo "$(date) Migration error:" >> "$CHART_PATH/error.log"
 
-helm install -f "$CHART_PATH/migration/values.yaml" migration "$CHART_PATH/migration/" -o json --wait --wait-for-jobs > output.json 2>> "$CHART_PATH/error.log"
-if [[ $? -eq 0 ]] ; then
+helm install -f "$CHART_PATH/migration/values.yaml" migration "$CHART_PATH/migration/" -o json --wait --wait-for-jobs > "$CHART_PATH/output.json" 2>> "$CHART_PATH/error.log"
+STATUS=jq '.info.status' <  "$CHART_PATH/output.json"
+if [[ $STATUS = "deployed" ]] ; then
   echo "Migration failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
 fi
 
-jq -r '.info.notes' < output.json > cleanup.sh
-rm output.json
-chmod 770 cleanup.sh
+jq -r '.info.notes' <  "$CHART_PATH/output.json" > "$CHART_PATH/cleanup.sh"
+chmod 770 "$CHART_PATH/cleanup.sh"
 
 echo "Migration successful..."
 echo ""
@@ -30,8 +30,9 @@ echo "Starting Netbox install..."
 
 echo "$(date) Netbox install error:" >> "$CHART_PATH/error.log"
 
-helm install -f netbox/values.yaml -f migration/posgresql.yaml netbox ./netbox/ --wait > /dev/null 2>> "$CHART_PATH/error.log"
-if [[ $? -eq 0 ]] ; then
+helm install -f netbox/values.yaml -f migration/posgresql.yaml netbox ./netbox/ -o json --wait >  "$CHART_PATH/output.json" 2>> "$CHART_PATH/error.log"
+STATUS=jq '.info.status' <  "$CHART_PATH/output.json"
+if [[ $STATUS = "deployed" ]] ; then
   echo "Netbox install failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
 fi
@@ -42,8 +43,9 @@ echo "Starting housekeeping..."
 
 echo "$(date) Housekeeping error:" >> "$CHART_PATH/error.log"
 
-helm upgrade -f netbox/values.yaml netbox ./netbox/ --wait > /dev/null 2>> "$CHART_PATH/error.log"
-if [[ $? -eq 0 ]] ; then
+helm upgrade -f netbox/values.yaml netbox ./netbox/ -o json --wait >  "$CHART_PATH/output.json" 2>> "$CHART_PATH/error.log"
+STATUS=jq '.info.status' <  "$CHART_PATH/output.json"
+if [[ $STATUS = "deployed" ]] ; then
   echo "Starting failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
 fi
@@ -53,6 +55,9 @@ if [[ $? -eq 0 ]] ; then
   echo "Starting failed: See $CHART_PATH/error.log for details"
   exit 1  # fail
 fi
+
+rm "$CHART_PATH/output.json"
+rm "$CHART_PATH/cleanup.sh"
 
 echo "Housekeeping successful..."
 echo "Netbox is ready and operational!"
