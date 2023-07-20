@@ -1,5 +1,15 @@
 #!/bin/bash
-helm install -f migration/values.yaml migration ./migration/ --wait --wait-for-jobs > cleanup.sh 2> migration-error.log
+CHART_PATH="$(dirname -- "${BASH_SOURCE[0]}")"       # relative
+CHART_PATH="$(cd -- "$CHART_PATH" && pwd)/../.."    # absolutized and normalized
+if [[ -z "$CHART_PATH" ]] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo "Can't access path:"
+  echo $CHART_PATH
+  exit 1  # fail
+fi
+
+helm install -f "$(CHART_PATH)/migration/values.yaml" migration "$(CHART_PATH)/migration/" --wait --wait-for-jobs > cleanup.sh 2> migration-error.log
 chmod 770 cleanup.sh
 cat cleanup.sh | jq -r '.info.notes' > cleanup.sh
 
