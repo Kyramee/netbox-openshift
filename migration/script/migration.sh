@@ -51,7 +51,7 @@ if [[ $STATUS = "deployed" ]] ; then
 fi
 
 $CHART_PATH/cleanup.sh > /dev/null 2>> "$CHART_PATH/error.log"
-rm "$CHART_PATH/*.json" "$CHART_PATH/cleanup.sh"
+rm "$CHART_PATH/migration_output.json" "$CHART_PATH/install_output.json" "$CHART_PATH/upgrade_output.json" "$CHART_PATH/cleanup.sh"
 
 echo "Housekeeping successful..."
 echo "Netbox is ready and operational!"
