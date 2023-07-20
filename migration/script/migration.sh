@@ -1,6 +1,7 @@
 #!/bin/bash
 print_usage() {
   echo "Usage: $(basename "$0") [netboxPassword] [postgresPassword] [OPTION]..."
+  echo ""
   echo "Options:"
   echo " -r,--redisPassword [redisPassword]"
   echo " -h,--help"
@@ -90,9 +91,9 @@ helm install netbox "$CHART_PATH/netbox/" \
   -f "$CHART_PATH/migration/posgresql.yaml" \
   -o json \
   --wait \
-  --set postgresql.auth.postgresPassword=$1 \
-  --set postgresql.auth.password=$2 \
-  --set redis.auth.password=$redis_password \
+  --set postgresql.auth.postgresPassword="$1" \
+  --set postgresql.auth.password="$2" \
+  --set redis.auth.password="$redis_password" \
   > "$CHART_PATH/install_output.json" \
   2>> "$CHART_PATH/error.log"
   
@@ -112,9 +113,9 @@ helm install netbox "$CHART_PATH/netbox/" \
   -f "$CHART_PATH/netbox/values.yaml" \
   -o json \
   --wait \
-  --set postgresql.auth.postgresPassword=$1 \
-  --set postgresql.auth.password=$2 \
-  --set redis.auth.password=$redis_password \
+  --set postgresql.auth.postgresPassword="$1" \
+  --set postgresql.auth.password="$2" \
+  --set redis.auth.password="$redis_password" \
   > "$CHART_PATH/upgrade_output.json" \
   2>> "$CHART_PATH/error.log"
 
