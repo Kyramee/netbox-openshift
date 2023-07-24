@@ -8,8 +8,8 @@ print_usage() {
   echo ""
   echo "This script execute the following:"
   echo "1. Retrieve a netbox database backup using the netbox-migration image stored in a OpenShift project of the same name"
-  echo "2. Install an instance of netbox with the retrived backu[] on OpenShift using helm"
-  echo "3. Do some housekeeping by removing all resources needed for the migration that are not needed by netbox"
+  echo "2. Install an instance of netbox with the retrieved backup on OpenShift using helm"
+  echo "3. Do some housekeeping by removing all resources needed for the migration that are not needed by Netbox"
 }
 
 POSITIONAL_ARGS=()
