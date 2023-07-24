@@ -1,4 +1,4 @@
 #!/bin/bash
-oc delete rolebinding -A --field-selector='.metadata.namespace=netbox-migration' -l housekeeping={{ include "migration.housekeeping" . }}
+oc delete rolebinding -A --field-selector='metadata.namespace=netbox-migration' -l housekeeping={{ include "migration.housekeeping" . }}
 oc delete job,pvc,serviceaccount -l housekeeping={{ include "migration.housekeeping" . }}
 helm uninstall {{ .Release.Name }}
