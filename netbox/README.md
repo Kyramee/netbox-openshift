@@ -4,7 +4,7 @@ Welcome to the documentation of the [NetBox] chart for OpenShift. This chart
 support multiple installation options like standalone, with a bundle redis
 instance, with bundle postgresql database instance or with both.
 
-> **Important**  
+> **Note**  
 > This chart was copied from the [bootc/netbox-chart] available on github. Some
 > section of the documentation has been removed from the original since those
 > sections do not apply in our environment.
@@ -27,7 +27,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 
 ## TL;DR
 
-This will install a Netbox instance with the default configuration.
+This will install a NetBox instance with the default configuration.
 
 ```shell
 git clone https://github.com/Kyramee/netbox-openshift.git
@@ -36,7 +36,7 @@ helm dependency build
 helm install netbox -f values.yaml ./
   --set postgresql.auth.postgresPassword=[postgresPassword] \
   --set postgresql.auth.password=[netboxPassword] \
-  --set redis.auth.password=[redisPassword] \
+  --set redis.auth.password=[redisPassword]
 ```
 
 The default configuration includes the required PostgreSQL and Redis database
@@ -47,7 +47,7 @@ services, but either or both may be managed externally if required.
 Always [use an existing Secret] and supply all passwords and secret keys
 yourself to avoid Helm regenerating any of them for you.
 
-> **Danger**  
+> **Important**  
 > You **MUST** minimally redefine **ALL** super user default parameters.  
 > *"Admin is not a good username and an even more terrible password..."*  
 > \- Me
@@ -85,7 +85,7 @@ To delete the chart:
 helm delete netbox
 ```
 
-This will not delete the PersistenteVolumeClaims that Netbox, Redis and
+This will not delete the PersistenteVolumeClaims that NetBox, Redis and
 postgresql generated with the installations. Those volumes can be used for data
 migration or safe-keeping for later use.
 
@@ -111,23 +111,23 @@ Ideally, you should also supply the `postgresql.auth.postgresPassword` and,
 if using replication, the `postgresql.auth.replicationPassword`. Please see the
 [upstream documentation] for further information.
 
-### Upgrading the Netbox app
+### Upgrading the NetBox app
 
-Here are the rules that one must respect in order to upgrade the Netbox default
+Here are the rules that one must respect in order to upgrade the NetBox default
 version specified in the `appVersion` field of the [Chart.yaml].
 
 #### The rules
-- All configurable parameters available in Netbox must be present.
+- All configurable parameters available in NetBox must be present.
 - Documentation **must** be updated.
 - Deprecated fields must mark as such with the version cut off.
 - Backward compatibility must be maintained to a reasonable limit.
 
-You can consult the official Netbox documentation for any missing configurable
+You can consult the official NetBox documentation for any missing configurable
 parameters to the [values.yaml]. Currently, the parameters appear in the same
 order that they appear in the documentation and it would be nice if it's stayed
 this way.
 
-Do not forget to check the compatibility of new the new Netbox version with the 
+Do not forget to check the compatibility of new the new NetBox version with the 
 bundle charts ([Bitnami Redis chart] and [Bitnami postgres chart]).
 
 ## Configuration
@@ -148,7 +148,7 @@ behaviour or affect all resources.
 | `useExternalRedis`                              | Set to true to use a external Redis instance *                      | `false`                                      |
 | `useSentinelRedis`                              | Set to true to use a Sentinel Redis instance *                      | `false`                                      |
 | `useNetboxHousekeeping`                         | Enable NetBox housekeeping management dayly cronjob                 | `true`                                       |
-| `useNetboxWorker`                               | Use a instance of Netbox worker along with Netbox main instance     | `true`                                       |
+| `useNetboxWorker`                               | Use a instance of NetBox worker along with NetBox main instance     | `true`                                       |
 | `commonLabels`                                  | Labels that all resources will have                                 | `{}`                                         |
 | `commonAnnotations`                             | Annotations that all resources will have                            | `{}`                                         |
 | `existingSecret`                                | Name of the sercret that contain the necessary password             | `""`                                         |
@@ -156,10 +156,10 @@ behaviour or affect all resources.
 > **Note**  
 >\* Only one should be set to true
 
-### Netbox image
+### NetBox image
 
 The following table lists the configurable parameters that control where and
-which version of Netbox the chart will pull and use.
+which version of NetBox the chart will pull and use.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -168,9 +168,9 @@ which version of Netbox the chart will pull and use.
 | `image.tag`                                     | NetBox container image tag (Valid Semver input only)                | `""`                                         |
 | `image.imagePullSecrets`                        | Secrets needed for authentication for external repository           | `[]`                                         |
 
-### Netbox super user
+### NetBox super user
 
-The following table lists the configurable parameters of the Netbox super user.
+The following table lists the configurable parameters of the NetBox super user.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -179,9 +179,9 @@ The following table lists the configurable parameters of the Netbox super user.
 | `superuser.password`                            | Super user password                                                 | `admin`                                      |
 | `superuser.apiToken`                            | Super user apiToken                                                 | `0123456789abcdef0123456789abcdef01234567`   |
 
-### Netbox configuration (ConfigMap)
+### NetBox configuration (ConfigMap)
 
-The following table lists the configurable parameters of Netbox.
+The following table lists the configurable parameters of NetBox.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -370,9 +370,9 @@ The following table lists the configurable parameters of Netbox.
 | `napalm.timeout`                                | **Deprecated**: Timeout for NAPALM connection (version <=3.4.x only)| `30`                                         |
 | `napalm.args`                                   | **Deprecated**: Dictionary of optional args (version <=3.4.x only)  | `{}`                                         |
 
-### Netbox housekeeping (CronJob)
+### NetBox housekeeping (CronJob)
 
-The following table lists the configurable parameters of Netbox housekeeping.
+The following table lists the configurable parameters of NetBox housekeeping.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -396,9 +396,9 @@ The following table lists the configurable parameters of Netbox housekeeping.
 | `housekeeping.affinity`                         | Affinity settings for housekeeping CronJob pod assignment           | `{}`                                         |
 | `housekeeping.tolerations`                      | Toleration labels for housekeeping CronJob pod assignment           | `[]`                                         |
 
-### Netbox Deployment
+### NetBox Deployment
 
-The following table lists the configurable parameters of Netbox Deployment.
+The following table lists the configurable parameters of NetBox Deployment.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -432,9 +432,9 @@ The following table lists the configurable parameters of Netbox Deployment.
 | `deployment.hostAliases`                        | List of hosts and IPs that will be added into the pod's hosts file  | `[]`                                         |
 | `deployment.topologySpreadConstraints`          | Configure Pod Topology Spread Constraints for NetBox                | `[]`                                         |
 
-### Netbox HorizontalPodAutoscaler
+### NetBox HorizontalPodAutoscaler
 
-The following table lists the configurable parameters of Netbox HorizontalPodAutoscaler.
+The following table lists the configurable parameters of NetBox HorizontalPodAutoscaler.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -444,9 +444,9 @@ The following table lists the configurable parameters of Netbox HorizontalPodAut
 | `autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilisation percentage for autoscaling                   | `80`                                         |
 | `autoscaling.targetMemoryUtilizationPercentage` | Target memory utilisation percentage for autoscaling                | `80`                                         |
 
-### Netbox Ingress
+### NetBox Ingress
 
-The following table lists the configurable parameters of Netbox Ingress.
+The following table lists the configurable parameters of NetBox Ingress.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -456,10 +456,10 @@ The following table lists the configurable parameters of Netbox Ingress.
 | `ingress.hosts`                                 | List of hosts and paths to map to the service                       | *See [values.yaml]*                          |
 | `ingress.tls`                                   | TLS settings for the `Ingress` resource                             | `[]`                                         |
 
-### Netbox PersistenteVolumeClaim
+### NetBox PersistenteVolumeClaim
 
 The following table lists the configurable parameters of both media and reports
-Netbox PersistenteVolumeClaim.
+NetBox PersistenteVolumeClaim.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -478,9 +478,9 @@ Netbox PersistenteVolumeClaim.
 | `persistence.reports.accessMode`                | Access mode for the volume                                          | `ReadWriteOnce`                              |
 | `persistence.reports.size`                      | Size of persistent volume to request                                | `1Gi`                                        |
 
-### Netbox Service
+### NetBox Service
 
-The following table lists the configurable parameters of Netbox Service.
+The following table lists the configurable parameters of NetBox Service.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -496,9 +496,9 @@ The following table lists the configurable parameters of Netbox Service.
 | `service.loadBalancerIP`                        | Request a specific IP address when `service.type` is LoadBalancer   | `""`                                         |
 | `service.loadBalancerSourceRanges`              | A list of allowed IP ranges when `service.type` is LoadBalancer     | `[]`                                         |
 
-### Netbox ServiceAccount
+### NetBox ServiceAccount
 
-The following table lists the configurable parameters of Netbox ServiceAccount.
+The following table lists the configurable parameters of NetBox ServiceAccount.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -506,20 +506,20 @@ The following table lists the configurable parameters of Netbox ServiceAccount.
 | `serviceAccount.annotations`                    | Annotations to add to the service account                           | `{}`                                         |
 | `serviceAccount.name`                           | Name used instead of the `netbox.fullname` value when not empty     | `""`                                         |
 
-### Netbox ServiceMonitor
+### NetBox ServiceMonitor
 
-The following table lists the configurable parameters of Netbox ServiceMonitor.
+The following table lists the configurable parameters of NetBox ServiceMonitor.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
-| `serviceMonitor.enabled`                        | Whether to enable a [ServiceMonitor] for Netbox                     | `false`                                      |
+| `serviceMonitor.enabled`                        | Whether to enable a [ServiceMonitor] for NetBox                     | `false`                                      |
 | `serviceMonitor.additionalLabels`               | Additonal labels to apply to the ServiceMonitor                     | `{}`                                         |
 | `serviceMonitor.interval`                       | Interval to scrape metrics.                                         | `1m`                                         |
 | `serviceMonitor.scrapeTimeout`                  | Timeout duration for scraping metrics                               | `10s`                                        |
 
-### Netbox Worker
+### NetBox Worker
 
-The following table lists the configurable parameters of Netbox Worker.
+The following table lists the configurable parameters of NetBox Worker.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -541,9 +541,9 @@ The following table lists the configurable parameters of Netbox Worker.
 | `worker.hostAliases`                            | List of hosts and IPs that will be added into the pod's hosts file  | `[]`                                         |
 | `worker.topologySpreadConstraints`              | Configure Pod Topology Spread Constraints for NetBox                | `[]`                                         |
 
-### Netbox Worker HorizontalPodAutoscaler
+### NetBox Worker HorizontalPodAutoscaler
 
-The following table lists the configurable parameters of Netbox Worker HorizontalPodAutoscaler.
+The following table lists the configurable parameters of NetBox Worker HorizontalPodAutoscaler.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
@@ -553,9 +553,9 @@ The following table lists the configurable parameters of Netbox Worker Horizonta
 | `workerAutoscaling.targetCPUUtilizationPercentage`    | Target CPU utilisation percentage for autoscaling             | `80`                                         |
 | `workerAutoscaling.targetMemoryUtilizationPercentage` | Target memory utilisation percentage for autoscaling          | `80`                                         |
 
-### Netbox connection test
+### NetBox connection test
 
-The following table lists the configurable parameters of Netbox connection test.
+The following table lists the configurable parameters of NetBox connection test.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
