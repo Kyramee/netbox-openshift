@@ -92,7 +92,7 @@ migration or safe-keeping for later use.
 If you do not need those PersistenteVolumeClaims you can delete them manually
 with the web interface or the command line.
 
-> **DANGER**  
+> **Important**  
 > Deleting a PersistenteVolumeClaims will result in **permenent** data lost.
 > Becareful when using a command like the one below.
 > ```shell
