@@ -14,7 +14,7 @@ nameOverride: ""
 ## Override the default value when defining netbox.fullname.
 fullnameOverride: ""
 
-## Set to true to use a bundled postgresql database
+## Set to true to use the bundled postgresql database
 useBundlePostgresql: true
 
 ## Set one only one to true to chose between using bundled, external or
@@ -27,17 +27,18 @@ useSentinelRedis: false
 # Set to false to disable the dayly cronjob.
 useNetboxHousekeeping: true
 
-## Only required for Netbox Jobs, e.g. Webhooks
+## Use a instance of Netbox worker along with Netbox main instance
+# Only required for Netbox Jobs, e.g. Webhooks
 useNetboxWorker: true
 
-## Common labels shared with all component
-commonLabels:
-  app: netbox-migration-test
+## Labels that all resources will have
+commonLabels: {}
 
-## Common annotations shared with all component
+## Annotations that all resources will have
 commonAnnotations: {}
 
-## Provide passwords using existing secret
+## Name of the sercret that contain the necessary password
+# Provide passwords using existing secret
 # If set, this Secret must contain the following keys:
 # - db_password: database password (if postgresql.enabled is false and
 #     externalDatabase.existingSecretName is blank)
@@ -63,7 +64,8 @@ existingSecret: ""
 image:
   repository: netboxcommunity/netbox
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  ## Overrides the image tag whose default is the chart appVersion.
+  # Valid Semver input only
   tag: ""
 
   imagePullSecrets: []
@@ -89,7 +91,7 @@ superuser:
 
 ###########################################################################
 #
-# Netbox ConfigMap (configuration)
+# Netbox configuration (ConfigMap)
 #
 ###########################################################################
 
@@ -103,27 +105,6 @@ superuser:
 # hostnames. The first FQDN in the list will be treated as the preferred name.
 allowedHosts:
   - '*'
-
-## Bundle database settings
-# These options override the default values in the bundle postgresql chart
-# values.yaml file. See the bitnami values.yaml file here:
-# https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
-postgresql:
-  auth:
-    username: netbox
-    database: netbox
-  # For OpenShift, it is important that fsGroup and runAsUser fields are kept EMPTY unless
-  # you you know what you are doing with uid and SCC
-  primary:
-    podSecurityContext:
-      fsGroup:
-    containerSecurityContext:
-      runAsUser:
-  readReplicas:
-    podSecurityContext:
-      fsGroup:
-    containerSecurityContext:
-      runAsUser:
 
 ## External database settings
 # These are used if useBundlePostgresql is false, and are ignored otherwise
@@ -139,25 +120,6 @@ externalDatabase:
   connMaxAge: 300
   disableServerSideCursors: false
   targetSessionAttrs: read-write
-
-
-## Bundle redis settings
-# These options override the default values in the bundle redis chart
-# values.yaml file. See the bitnami values.yaml file here:
-# https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
-redis:
-  # For OpenShift, it is important that fsGroup and runAsUser fields are kept EMPTY unless
-  # you you know what you are doing with uid and SCC
-  master:
-    podSecurityContext:
-      fsGroup:
-    containerSecurityContext:
-      runAsUser:
-  replica:
-    podSecurityContext:
-      fsGroup:
-    containerSecurityContext:
-      runAsUser:
 
 ## Bundle redis settings
 # These are used if useBundleRedis is true, and are ignored otherwise
@@ -504,12 +466,23 @@ changelogRetention: 90
 # assigned to a VRF), set enforceGlobalUnique to True.
 enforceGlobalUnique: false
 
+# The maximum amount (in bytes) of uploaded data that will be held in memory
+# before being written to the filesystem. Changing this setting can be useful
+# for example to be able to upload files bigger than 2.5MB to custom scripts for
+# processing.
+fileUploadMaxMemorySize: 2621440 # (2.5MB)
+
 # Enable the GraphQL API
 graphQlEnabled: true
 
+#### New (version >=3.5.x only) ####
 # The number of days to retain job results (scripts and reports). Set this to 0
 # to retain job results in the database indefinitely.
-#!!!!!! param name is "JOB_RETENTION" in 3.5 and later version !!!!!!
+jobRetention: 90
+
+#### Deprecated (version <=3.4.x only) ####
+# The number of days to retain job results (scripts and reports). Set this to 0
+# to retain job results in the database indefinitely.
 jobResultRetention: 90
 
 # Setting this to True will display a "maintenance mode" banner at the top of
@@ -612,12 +585,13 @@ extraConfig: []
   #     optional: false
 
 # -------------------------------------------------------------------------
-# Options removed in later verions
+#  **Deprecated ** Options removed in version 3.5.x verions
 # -------------------------------------------------------------------------
 
 napalm:
-  # Credentials that NetBox will use to access live devices.
+  # Username used by the NAPALM library to access network devices.
   username: ''
+  # Password used by the NAPALM library
   password: ''
 
   # NAPALM timeout (in seconds). (Default: 30)
@@ -631,7 +605,7 @@ napalm:
 
 ###########################################################################
 #
-# Netbox CronJob (housekeeping)
+# Netbox housekeeping (CronJob)
 #
 ###########################################################################
 
@@ -803,35 +777,6 @@ deployment:
 
 ###########################################################################
 #
-# Netbox migration
-#
-###########################################################################
-
-migration:
-  configMap:
-    hostname: 142.135.2.193
-    user: adminspt
-    known_hosts: >-
-      142.135.2.193 ecdsa-sha2-nistp256
-      AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCSyqW6kSEYh0FYJBvKLGj3FjTl3Z263iHEwRD63UCf5KcuMIykPM9Gh8jQJgqrPXTqZlqfgznoDGhmWWapO97M=
-    
-  pvc:
-    ## Persistent Volume Storage Class
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)
-    storageClass: ""
-
-    accessMode: ReadWriteOnce
-    ##
-    ## Persistant storage size request
-    size: 1Gi
-
-
-###########################################################################
-#
 # Netbox HorizontalPodAutoscaler
 #
 ###########################################################################
@@ -841,7 +786,7 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 
 ###########################################################################
@@ -967,11 +912,11 @@ service:
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
   name: ""
   # Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
 
 
 ###########################################################################
@@ -994,7 +939,7 @@ serviceMonitor:
 ###########################################################################
 
 worker:
-  # This options is overrlooked when autoscaling is enable
+  # This options is overlooked when autoscaling is enable
   replicaCount: 1
 
   updateStrategy: {}
@@ -1047,6 +992,8 @@ worker:
 
   hostAliases: []
 
+  topologySpreadConstraints: []
+
 
 ###########################################################################
 #
@@ -1059,7 +1006,7 @@ workerAutoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 
 ###########################################################################
@@ -1075,3 +1022,54 @@ test:
     pullPolicy: IfNotPresent
 
   resources: {}
+
+###########################################################################
+#
+# Bundle postgresql database override settings
+#
+###########################################################################
+
+## Bundle database settings
+# These options override the default values in the bundle postgresql chart
+# values.yaml file. See the bitnami values.yaml file here:
+# https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
+postgresql:
+  auth:
+    username: netbox
+    database: netbox
+  # For OpenShift, it is important that fsGroup and runAsUser fields are kept EMPTY unless
+  # you you know what you are doing with uid and SCC
+  primary:
+    podSecurityContext:
+      fsGroup:
+    containerSecurityContext:
+      runAsUser:
+  readReplicas:
+    podSecurityContext:
+      fsGroup:
+    containerSecurityContext:
+      runAsUser:
+
+###########################################################################
+#
+# Bundle redis override settings
+#
+###########################################################################
+
+## Bundle redis settings
+# These options override the default values in the bundle redis chart
+# values.yaml file. See the bitnami values.yaml file here:
+# https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+redis:
+  # For OpenShift, it is important that fsGroup and runAsUser fields are kept EMPTY unless
+  # you you know what you are doing with uid and SCC
+  master:
+    podSecurityContext:
+      fsGroup:
+    containerSecurityContext:
+      runAsUser:
+  replica:
+    podSecurityContext:
+      fsGroup:
+    containerSecurityContext:
+      runAsUser:

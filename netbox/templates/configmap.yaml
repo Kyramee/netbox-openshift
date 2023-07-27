@@ -269,8 +269,13 @@ data:
     BANNER_TOP: {{ .Values.bannerTop | quote }}
     CHANGELOG_RETENTION: {{ int .Values.changelogRetention }}
     ENFORCE_GLOBAL_UNIQUE: {{ toJson .Values.enforceGlobalUnique }}
+    FILE_UPLOAD_MAX_MEMORY_SIZE: {{ int .Values.fileUploadMaxMemorySize }}
     GRAPHQL_ENABLED: {{ toJson .Values.graphQlEnabled }}
-    JOBRESULT_RETENTION: {{ int .Values.jobResultRetention }} # param name is "JOB_RETENTION" in 3.5 and later version 
+    {{- if semverCompare ">=v3.5.x" (default .Values.image.tag .Chart.appVersion) -}}
+    JOB_RETENTION: {{ int .Values.jobRetention }}
+    {{- else -}}
+    JOBRESULT_RETENTION: {{ int .Values.jobResultRetention }} 
+    {{- end }}
     MAINTENANCE_MODE: {{ toJson .Values.maintenanceMode }}
     MAPS_URL: {{ .Values.mapsUrl | quote }}
     MAX_PAGE_SIZE: {{ int .Values.maxPageSize }}
