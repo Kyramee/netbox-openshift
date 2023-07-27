@@ -132,7 +132,7 @@ bundle charts ([Bitnami Redis chart] and [Bitnami postgres chart]).
 
 ## Configuration
 
-With more then 300 configurable parameters available on this chart
+This chart contain more than 300 configurable parameters... Good reading! 😅
 
 ### Chart configuration
 
