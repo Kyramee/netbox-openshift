@@ -141,7 +141,7 @@ behaviour or affect all resources.
 
 | Parameter                                       | Description                                                         | Default                                      |
 | ------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------|
-| `nameOverride`                                  | Override the default value when defining netbox.name.               | `""`                                         |
+| `nameOverride`                                  | Override the default value when defining netbox.name                | `""`                                         |
 | `fullnameOverride`                              | Override the default value when defining netbox.fullname            | `""`                                         |
 | `useBundlePostgresql`                           | Set to true to use the bundled postgresql database                  | `true`                                       |
 | `useBundleRedis`                                | Set to true to use the bundled Redis instance *                     | `true`                                       |
