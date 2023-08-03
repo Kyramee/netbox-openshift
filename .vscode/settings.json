@@ -6,5 +6,9 @@
         ],
         "https://json.schemastore.org/helmfile.json": "file:///c%3A/Users/CoteA9/OneDrive%20-%20SSC-SPC/Documents/netbox-openshift-chart/netbox-chart/templates/cronjob.yaml",
         "https://json.schemastore.org/yamllint.json": "file:///c%3A/Users/CoteA9/OneDrive%20-%20SSC-SPC/Documents/netbox-openshift-chart/netbox-chart/values.yaml"
+    },
+    "editor.rulers": [80,120],
+    "workbench.colorCustomizations": {
+      "editorRuler.foreground": "#920000"
     }
 }

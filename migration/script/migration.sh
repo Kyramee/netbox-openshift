@@ -84,11 +84,6 @@ echo "Migration successful..."
 echo ""
 echo "Starting Netbox install..."
 
-echo "Building Netbox dependencies..."
-cd "$CHART_PATH/netbox/"
-helm dependency build > /dev/null 2>> "$CHART_PATH/error.log"
-cd "$CHART_PATH/"
-
 echo "$(date) Netbox install error:" >> "$CHART_PATH/error.log"
 
 helm install netbox "$CHART_PATH/netbox/" \
