@@ -109,7 +109,8 @@ echo "Starting housekeeping..."
 
 echo "$(date) Housekeeping error:" >> "$CHART_PATH/error.log"
 
-helm upgrade netbox "$CHART_PATH/netbox/" \
+helm uninstall netbox --wait > /dev/null 2>> "$CHART_PATH/error.log"
+helm install netbox "$CHART_PATH/netbox/" \
   -f "$CHART_PATH/netbox/values.yaml" \
   -o json \
   --wait \

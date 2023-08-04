@@ -271,9 +271,9 @@ data:
     ENFORCE_GLOBAL_UNIQUE: {{ toJson .Values.enforceGlobalUnique }}
     FILE_UPLOAD_MAX_MEMORY_SIZE: {{ int .Values.fileUploadMaxMemorySize }}
     GRAPHQL_ENABLED: {{ toJson .Values.graphQlEnabled }}
-    {{- if semverCompare ">=v3.5.x" (default .Chart.AppVersion .Values.image.tag) -}}
+    {{- if semverCompare ">=v3.5.x" (default .Chart.AppVersion .Values.image.tag) }}
     JOB_RETENTION: {{ int .Values.jobRetention }}
-    {{- else -}}
+    {{- else }}
     JOBRESULT_RETENTION: {{ int .Values.jobResultRetention }} 
     {{- end }}
     MAINTENANCE_MODE: {{ toJson .Values.maintenanceMode }}
